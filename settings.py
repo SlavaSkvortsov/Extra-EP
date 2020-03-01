@@ -14,7 +14,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from typing import List
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'django_tables2',
     'django_bootstrap_breadcrumbs',
     'bootstrap4',
-    'registration',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,12 +54,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'extra_ep.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'extra_ep.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
@@ -82,9 +81,9 @@ WSGI_APPLICATION = 'extra_ep.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ep',
+        'NAME': '',
         'USER': 'postgres',
-        'PASSWORD': 'mivmeste',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '5432'
     }
@@ -128,7 +127,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = r'C:\Users\i_hat\Desktop\staticfiles'
+STATICFILES_DIRS = [
+    'static',
+]
 BREADCRUMBS_TEMPLATE = 'django_bootstrap_breadcrumbs/bootstrap4.html'
 
 DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap4.html'
@@ -136,3 +137,11 @@ DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap4.html'
 BOOTSTRAP4 = {
     'theme_url': 'https://bootswatch.com/4/slate/bootstrap.min.css',
 }
+
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/'
+
+try:
+    from local_settings import *
+except ImportError:
+    pass

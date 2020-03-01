@@ -3,6 +3,7 @@ from typing import Any, Dict
 import django_tables2 as tables
 from django.db.models import QuerySet, Sum
 from django.shortcuts import get_object_or_404
+from django.views.generic import RedirectView
 from django_tables2 import A
 
 from extra_ep.models import Combat, ItemConsumption, Report
@@ -42,7 +43,7 @@ class ItemConsumptionListView(tables.SingleTableView):
 
 class CombatTable(tables.Table):
     encounter = tables.LinkColumn(
-        viewname='item_consumption_list',
+        viewname='extra_ep:item_consumption_list',
         text=lambda combat: combat.encounter,
         kwargs={'combat_id': A('pk')},
     )
@@ -73,7 +74,11 @@ class CombatListView(tables.SingleTableView):
 
 
 class ReportTable(tables.Table):
-    raid_name = tables.LinkColumn('combat_list', text=lambda report: report.raid_name, kwargs={'report_id': A('pk')})
+    raid_name = tables.LinkColumn(
+        viewname='extra_ep:combat_list',
+        text=lambda report: report.raid_name,
+        kwargs={'report_id': A('pk')},
+    )
 
     class Meta:
         model = Report
@@ -117,3 +122,7 @@ class ItemConsumptionTotalListView(tables.SingleTableView):
         context = super().get_context_data(**kwargs)
         context['report'] = self.report
         return context
+
+
+class MainRedirectView(RedirectView):
+    pattern_name = 'extra_ep:report_list'

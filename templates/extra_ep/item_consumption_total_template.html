@@ -3,5 +3,6 @@
 
 {% block breadcrumbs %}
     {{ block.super }}
-    {% breadcrumb report.raid_name '' %}
+    {% breadcrumb report.raid_name 'extra_ep:combat_list' report.id %}
+    {% breadcrumb 'Все бои' '' %}
 {% endblock %}

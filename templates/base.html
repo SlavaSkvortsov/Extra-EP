@@ -1,10 +1,12 @@
 {% load django_bootstrap_breadcrumbs %}
 {% load bootstrap4 %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     {% bootstrap_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'extra_ep/style.css' %}">
 
     {% block head %}
         <meta charset="UTF-8">
@@ -16,10 +18,11 @@
 <body>
 {% block breadcrumbs %}
     {% clear_breadcrumbs %}
-    {% breadcrumb "Отчеты" "report_list" %}
+    {% breadcrumb 'Отчеты' 'extra_ep:report_list' %}
 {% endblock %}
 {% block body %}
-    {% block main %}{% endblock %}
+    {% render_breadcrumbs %}
+    {% block content %}{% endblock %}
 {% endblock %}
 </body>
 </html>

@@ -1,8 +1,0 @@
-{% extends "tableview_template.html" %}
-{% load django_bootstrap_breadcrumbs %}
-
-{% block breadcrumbs %}
-    {{ block.super }}
-    {% breadcrumb report.raid_name 'combat_list' report.id %}
-    {% breadcrumb 'Все бои' '' %}
-{% endblock %}

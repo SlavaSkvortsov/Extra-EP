@@ -6,7 +6,7 @@
     {% breadcrumb report.raid_name '' %}
 {% endblock %}
 
-{% block main %}
-    <a href="{% url 'item_consumption_total' report_id=report.id %}" class="btn btn-primary">Все бои</a>
+{% block content %}
+    <a href="{% url 'extra_ep:item_consumption_total' report_id=report.id %}" class="btn btn-primary">Все бои</a>
     {{ block.super }}
 {% endblock %}

@@ -9,6 +9,6 @@
 
 {% block breadcrumbs %}
     {{ block.super }}
-    {% breadcrumb combat.report.raid_name 'combat_list' combat.report_id %}
+    {% breadcrumb combat.report.raid_name 'extra_ep:combat_list' combat.report_id %}
     {% breadcrumb combat.encounter '' %}
 {% endblock %}

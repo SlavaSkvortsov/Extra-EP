@@ -3,9 +3,6 @@
 {% load static %}
 {% load django_bootstrap_breadcrumbs %}
 
-{% block body %}
-    {% render_breadcrumbs %}
-    {% block main %}
-        {% render_table table %}
-    {% endblock %}
+{% block content %}
+    {% render_table table %}
 {% endblock %}

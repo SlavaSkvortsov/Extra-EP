@@ -1,0 +1,9 @@
+.nav-container {
+  position:relative;
+}
+.nav-right-block {
+  position:absolute;
+  right:1rem;
+  top:50%;
+  transform:translateY(-50%);
+}
