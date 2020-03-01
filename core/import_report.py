@@ -1,15 +1,15 @@
 import csv
-from typing import List
+from typing import List, TextIO
 
 from django.utils.functional import cached_property
 
-from core.constants import ENCOUNTERS, SPELL_TO_ITEM_MAP, ITEM_ID_TO_BONUS_EP
+from core.constants import ENCOUNTERS, ITEM_ID_TO_BONUS_EP, SPELL_TO_ITEM_MAP
 from core.utils import parse_datetime_str
-from extra_ep.models import Combat, Report, ItemConsumption, Player
+from extra_ep.models import Combat, ItemConsumption, Player, Report
 
 
 class ReportImporter:
-    def __init__(self, report_id: int, log_file):
+    def __init__(self, report_id: int, log_file: TextIO) -> None:
         self.report_id = report_id
         self.log_file = log_file
 
@@ -33,7 +33,7 @@ class ReportImporter:
                     started=time,
                     ended=time,
                 )
-            elif event == 'ENCOUNTER_END':
+            elif event == 'ENCOUNTER_END' and combat:
                 time = parse_datetime_str(datetime_str)
                 combat.ended = time
                 combat.save()
