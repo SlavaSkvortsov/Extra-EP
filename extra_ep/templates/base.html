@@ -1,0 +1,25 @@
+{% load django_bootstrap_breadcrumbs %}
+{% load bootstrap4 %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% bootstrap_css %}
+
+    {% block head %}
+        <meta charset="UTF-8">
+        <title>
+            {% block title %}Title{% endblock %}
+        </title>
+    {% endblock %}
+</head>
+<body>
+{% block breadcrumbs %}
+    {% clear_breadcrumbs %}
+    {% breadcrumb "Отчеты" "report_list" %}
+{% endblock %}
+{% block body %}
+    {% block main %}{% endblock %}
+{% endblock %}
+</body>
+</html>

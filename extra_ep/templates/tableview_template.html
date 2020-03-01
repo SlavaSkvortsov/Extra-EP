@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load django_tables2 %}
+{% load static %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block body %}
+    {% render_breadcrumbs %}
+    {% block main %}
+        {% render_table table %}
+    {% endblock %}
+{% endblock %}

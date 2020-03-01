@@ -1,0 +1,14 @@
+{% extends "tableview_template.html" %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block head %}
+    {{ block.super }}
+    <script>var whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true};</script>
+    <script src="https://wow.zamimg.com/widgets/power.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb combat.report.raid_name 'combat_list' combat.report_id %}
+    {% breadcrumb combat.encounter '' %}
+{% endblock %}
