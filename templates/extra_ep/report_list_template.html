@@ -1,2 +1,9 @@
 {% extends "tableview_template.html" %}
 {% load django_bootstrap_breadcrumbs %}
+
+{% block content %}
+    {% if request.user.is_staff %}
+        <a href="{% url 'extra_ep:report_create' %}" class="btn btn-primary">Создать отчет</a>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

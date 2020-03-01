@@ -8,10 +8,12 @@ class ReportExporter:
         self.report_id = report_id
 
     def export(self) -> str:
-        result_qs = ItemConsumption.objects.filter(
-            combat__report_id=self.report_id,
-        ).values(
+        result_qs = ItemConsumption.objects.values(
             'player__name',
+        ).order_by(
+            'player__name',
+        ).filter(
+            combat__report_id=self.report_id,
         ).annotate(
             ep_sum=Sum('ep'),
         ).values_list('player__name', 'ep_sum')

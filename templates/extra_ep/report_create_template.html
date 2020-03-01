@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load django_tables2 %}
+{% load static %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb 'Создать' '' %}
+{% endblock %}
+
+{% block content %}
+    <form method="post" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Загрузить" class="btn btn-primary">
+    </form>
+{% endblock %}

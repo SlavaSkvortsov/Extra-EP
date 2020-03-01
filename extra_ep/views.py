@@ -1,11 +1,17 @@
+import codecs
 from typing import Any, Dict
 
 import django_tables2 as tables
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import QuerySet, Sum
 from django.shortcuts import get_object_or_404
-from django.views.generic import RedirectView
+from django.urls import reverse
+from django.views.generic import RedirectView, DetailView, UpdateView, CreateView
 from django_tables2 import A
 
+from core.export_report import ReportExporter
+from core.import_report import ReportImporter
+from extra_ep.forms import ChangeExportedForm, UploadFile
 from extra_ep.models import Combat, ItemConsumption, Report
 
 
@@ -70,6 +76,7 @@ class CombatListView(tables.SingleTableView):
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['report'] = self.report
+        context['change_exported_from'] = ChangeExportedForm(instance=self.report)
         return context
 
 
@@ -111,6 +118,8 @@ class ItemConsumptionTotalListView(tables.SingleTableView):
         self.report = get_object_or_404(Report, id=self.kwargs.get('report_id'))
         qs = ItemConsumption.objects.filter(
             combat__report=self.report,
+        ).order_by(
+            'player__name',
         ).values(
             'player__name',
         ).annotate(
@@ -126,3 +135,45 @@ class ItemConsumptionTotalListView(tables.SingleTableView):
 
 class MainRedirectView(RedirectView):
     pattern_name = 'extra_ep:report_list'
+
+
+class ExportReportView(DetailView):
+    model = Report
+    template_name = 'extra_ep/report_export_template.html'
+    pk_url_kwarg = 'report_id'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data()
+        context['data'] = ReportExporter(report_id=self.object.id).export()
+        return context
+
+
+class ChangeExportedView(UpdateView):
+    model = Report
+    form_class = ChangeExportedForm
+    pk_url_kwarg = 'report_id'
+
+    def get_success_url(self):
+        return reverse('extra_ep:combat_list', kwargs={'report_id': self.object.id})
+
+
+class CreateReportView(CreateView):
+    form_class = UploadFile
+    template_name = 'extra_ep/report_create_template.html'
+
+    def get_success_url(self):
+        return reverse('extra_ep:combat_list', kwargs={'report_id': self.object.id})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+        importer = ReportImporter(
+            report_id=self.object.id,
+            log_file=codecs.iterdecode(form.files['log_file'].file, 'utf-8'),
+        )
+        importer.process()
+        return result

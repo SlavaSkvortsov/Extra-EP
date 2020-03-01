@@ -42,6 +42,7 @@ class ReportImporter:
                 self._make_item_consumption(row, combat)
 
         self._report.raid_name = ', '.join(sorted(raids))
+        self._report.save()
 
     @staticmethod
     def _make_item_consumption(row: List[str], combat: Combat) -> None:
