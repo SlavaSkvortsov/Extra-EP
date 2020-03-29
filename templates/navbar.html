@@ -1,0 +1,31 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg color-box">
+    <a class="navbar-brand" href="/">Адепты Катаклизма</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        {% with url_name=request.resolver_match.url_name %}
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item{% if url_name == 'report_list' %} active{% endif %}">
+                <a class="nav-link" href="{% url 'extra_ep:report_list' %}">Отчеты</a>
+            </li>
+            <li class="nav-item{% if url_name == 'calendar_month' %} active{% endif %}">
+                <a class="nav-link" href="{% url 'calendar_current_month' %}">Календарь</a>
+            </li>
+            <li class="nav-item">
+                <a target="_blank" class="nav-link" href="https://discord.gg/hbyzQyY">
+                    <img src="{% static 'extra_ep/discord.png' %}" width="20" height="20"> Дискорд
+                </a>
+            </li>
+        </ul>
+        {% endwith %}
+    </div>
+
+    <div class="my-2 my-lg-0">
+        {%  if not request.user.is_anonymous %}
+            <span>Привет, {{ request.user }}!</span>
+            <a href="{% url 'auth:logout' %}" class="btn btn-danger">Выйти</a>
+        {% else %}
+            <a href="{% url 'auth:login' %}" class="btn btn-success">Войти</a>
+            <a href="{% url 'django_registration_register' %}" class="btn btn-secondary">Регистрация</a>
+        {% endif %}
+    </div>
+</nav>

@@ -31,7 +31,7 @@ class ItemConsumptionTable(tables.Table):
 class ItemConsumptionListView(tables.SingleTableView):
     model = ItemConsumption
     table_class = ItemConsumptionTable
-    template_name = 'extra_ep/item_consumption_list_template.html'
+    template_name = 'extra_ep/report/item_consumption_list_template.html'
 
     def __init__(self) -> None:
         super().__init__()
@@ -63,7 +63,7 @@ class CombatTable(tables.Table):
 class CombatListView(tables.SingleTableView):
     model = Combat
     table_class = CombatTable
-    template_name = 'extra_ep/combat_list_template.html'
+    template_name = 'extra_ep/report/combat_list_template.html'
 
     def __init__(self) -> None:
         super().__init__()
@@ -95,7 +95,7 @@ class ReportTable(tables.Table):
 class ReportListView(tables.SingleTableView):
     model = Report
     table_class = ReportTable
-    template_name = 'extra_ep/report_list_template.html'
+    template_name = 'extra_ep/report/report_list_template.html'
 
 
 class ItemConsumptionTotalTable(tables.Table):
@@ -108,7 +108,7 @@ class ItemConsumptionTotalTable(tables.Table):
 class ItemConsumptionTotalListView(tables.SingleTableView):
     model = ItemConsumption
     table_class = ItemConsumptionTotalTable
-    template_name = 'extra_ep/item_consumption_total_template.html'
+    template_name = 'extra_ep/report/item_consumption_total_template.html'
 
     def __init__(self) -> None:
         super().__init__()
@@ -139,7 +139,7 @@ class MainRedirectView(RedirectView):
 
 class ExportReportView(DetailView):
     model = Report
-    template_name = 'extra_ep/report_export_template.html'
+    template_name = 'extra_ep/report/report_export_template.html'
     pk_url_kwarg = 'report_id'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
@@ -159,7 +159,7 @@ class ChangeExportedView(UpdateView):
 
 class CreateReportView(CreateView):
     form_class = UploadFile
-    template_name = 'extra_ep/report_create_template.html'
+    template_name = 'extra_ep/report/report_create_template.html'
 
     def get_success_url(self):
         return reverse('extra_ep:combat_list', kwargs={'report_id': self.object.id})

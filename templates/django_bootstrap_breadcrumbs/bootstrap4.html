@@ -10,13 +10,4 @@
         {% endfor %}
       </ol>
     </nav>
-    <div class="nav-right-block">
-        {%  if not request.user.is_anonymous %}
-            <span>Привет, {{ request.user }}!</span>
-            <a href="{% url 'auth:logout' %}" class="btn btn-danger">Выйти</a>
-        {% else %}
-            <a href="{% url 'auth:login' %}" class="btn btn-success">Войти</a>
-            <a href="{% url 'django_registration_register' %}" class="btn btn-secondary">Регистрация</a>
-        {% endif %}
-    </div>
 </div>

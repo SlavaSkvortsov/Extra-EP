@@ -7,3 +7,4 @@ django-tables2-bootstrap4==2.0.0b5
 
 pytz==2019.3
 psycopg2==2.8.4
+git+git://github.com/SlavaSkvortsov/django-calendarium@v1.0

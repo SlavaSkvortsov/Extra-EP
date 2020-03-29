@@ -33,6 +33,10 @@ ALLOWED_HOSTS: List[str] = []
 
 INSTALLED_APPS = [
     'extra_ep',
+    'filer',
+    'mptt',
+    'easy_thumbnails',
+    'calendarium',
     'django_tables2',
     'django_bootstrap_breadcrumbs',
     'bootstrap4',
@@ -112,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -137,6 +141,10 @@ DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap4.html'
 BOOTSTRAP4 = {
     'theme_url': 'https://bootswatch.com/4/slate/bootstrap.min.css',
 }
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
 
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'

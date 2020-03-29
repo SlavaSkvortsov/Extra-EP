@@ -5,24 +5,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     {% bootstrap_css %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'extra_ep/favicon.ico' %}"/>
+    <link rel="stylesheet" href="{% static "calendarium/css/calendar.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static 'extra_ep/style.css' %}">
-
     {% block head %}
         <meta charset="UTF-8">
         <title>
-            {% block title %}Title{% endblock %}
+            {% block title %}Адепты Катаклизма{% endblock %}
         </title>
     {% endblock %}
 </head>
 <body>
-{% block breadcrumbs %}
-    {% clear_breadcrumbs %}
-    {% breadcrumb 'Отчеты' 'extra_ep:report_list' %}
-{% endblock %}
-{% block body %}
-    {% render_breadcrumbs %}
-    {% block content %}{% endblock %}
-{% endblock %}
+
+{% include "navbar.html" %}
+<div id="page-wrap">
+    {% block body %}
+        {% render_breadcrumbs %}
+        {% block content %}{% endblock %}
+        {% block main %}{% endblock %}  {# For calendarium #}
+    {% endblock %}
+</div>
 </body>
 </html>

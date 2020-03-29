@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+<h1>{% trans "Occurrences" %}</h1>
+<form action="." method="post">
+    {% csrf_token %}
+    <input class="btn btn-default" type="submit" name="previous" value="{% trans "Previous" %}" />
+    <input class="btn btn-default" type="submit" name="next" value="{% trans "Next" %}" />
+    <input class="btn btn-default" type="submit" name="today" value="{% trans "Today" %}" />
+</form>
+<table class="table">
+    <tr>
+        <th>{{ date|date:'D m/d' }}</th>
+    </tr>
+    <tr>
+        {% for occurrence in occurrences %}
+            <td><p>{{ occurrence }}</p></td>
+        {% endfor %}
+    </tr>
+</table>
+{% endblock %}
