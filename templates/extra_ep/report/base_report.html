@@ -1,7 +1,12 @@
-{% extends "tableview_template.html" %}
+{% extends "base.html" %}
+{% load django_tables2 %}
+{% load static %}
 {% load django_bootstrap_breadcrumbs %}
 
 {% block breadcrumbs %}
-    {% clear_breadcrumbs %}
     {% breadcrumb 'Отчеты' 'extra_ep:report_list' %}
+{% endblock %}
+
+{% block content %}
+    {% render_table table %}
 {% endblock %}
