@@ -44,3 +44,7 @@ body {
 #calendar-week tr td {
     background: #272B30;
 }
+
+.false {
+    color: red;
+}
