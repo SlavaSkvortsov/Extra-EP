@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 import django_tables2 as tables
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.db.models import QuerySet, Sum
+from django.db.models import QuerySet, Sum, Count, F
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import RedirectView, DetailView, UpdateView, CreateView
@@ -98,11 +98,14 @@ class ReportListView(tables.SingleTableView):
     template_name = 'extra_ep/report/report_list_template.html'
 
 
-class ItemConsumptionTotalTable(tables.Table):
+class ItemConsumptionTotalTable(ItemConsumptionTable):
+    count = tables.Column(verbose_name='Кол-во')
+    used_at = None
+
     class Meta:
         model = ItemConsumption
         per_page = 100
-        fields = ('player__name', 'ep')
+        fields = ('player', 'item_link', 'count', 'ep')
 
 
 class ItemConsumptionTotalListView(tables.SingleTableView):
@@ -120,10 +123,14 @@ class ItemConsumptionTotalListView(tables.SingleTableView):
             combat__report=self.report,
         ).order_by(
             'player__name',
+            'item_id',
         ).values(
             'player__name',
+            'item_id',
         ).annotate(
             ep=Sum('ep'),
+            count=Count('id'),
+            player=F('player__name'),
         )
         return qs
 
