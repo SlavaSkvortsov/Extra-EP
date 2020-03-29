@@ -3,10 +3,11 @@
 {% load static %}
 {% load django_bootstrap_breadcrumbs %}
 
-{% block breadcrumbs %}
-    {% breadcrumb 'Отчеты' 'extra_ep:report_list' %}
-{% endblock %}
-
 {% block content %}
+    {% block breadcrumbs %}
+        {% breadcrumb 'Отчеты' 'extra_ep:report_list' %}
+    {% endblock %}
+    {% render_breadcrumbs %}
+    {% block before_table %}{% endblock %}
     {% render_table table %}
 {% endblock %}

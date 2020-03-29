@@ -6,7 +6,7 @@
     {% breadcrumb report.raid_name '' %}
 {% endblock %}
 
-{% block content %}
+{% block before_table %}
     <div>
         <a href="{% url 'extra_ep:item_consumption_total' report_id=report.id %}" class="btn btn-primary">Все бои</a>
         {% if request.user.is_staff %}

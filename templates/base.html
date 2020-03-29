@@ -20,14 +20,12 @@
     {% endblock %}
 </head>
 <body>
-
-{% include "navbar.html" %}
-<div id="page-wrap">
-    {% block body %}
-        {% render_breadcrumbs %}
-        {% block content %}{% endblock %}
-        {% block main %}{% endblock %}  {# For calendarium #}
-    {% endblock %}
-</div>
+{% block body %}
+    {% include "navbar.html" %}
+    <div id="page-wrap">
+            {% block content %}{% endblock %}
+            {% block main %}{% endblock %}  {# For calendarium #}
+    </div>
+{% endblock %}
 </body>
 </html>

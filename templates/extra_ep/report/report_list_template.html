@@ -1,7 +1,7 @@
 {% extends "extra_ep/report/base_report.html" %}
 {% load django_bootstrap_breadcrumbs %}
 
-{% block content %}
+{% block before_table %}
     {% if request.user.is_staff %}
         <a href="{% url 'extra_ep:report_create' %}" class="btn btn-primary">Создать отчет</a>
     {% endif %}
