@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-3">
+            <h2>Статик "{{ object.name }}"</h2>
+        </div>
+        <div class="col-7"></div>
+        <div class="col-2">
+            <a href="{% url 'extra_ep:edit_static_properties' object.id %}" class="btn btn-info">Редактировать</a>
+        </div>
+    </div>
+        <h4>РЛ <span class="class-{{ object.raid_leader.class }}">{{ object.raid_leader }}</span></h4>
+
+    <h3>Танки:</h3>
+    {% with tanks_table as table %}
+        {% include 'extra_ep/raids/static_table_snippet.html' %}
+    {% endwith %}
+
+    {% if can_add_tanks %}
+        <form method="post" action="{% url 'extra_ep:add_character_to_static' object.id %}">
+            {% csrf_token %}
+            {{ add_to_static_form }}
+            <input type="submit" name="tank" value="Добавить" class="btn btn-primary">
+        </form>
+    {% endif %}
+
+    <h3>Хилы:</h3>
+    {% with healers_table as table %}
+        {% include 'extra_ep/raids/static_table_snippet.html' %}
+    {% endwith %}
+
+    {% if can_add_healers %}
+        <form method="post" action="{% url 'extra_ep:add_character_to_static' object.id %}">
+            {% csrf_token %}
+            {{ add_to_static_form }}
+            <input type="submit" name="heal" value="Добавить" class="btn btn-primary">
+        </form>
+    {% endif %}
+
+    <h3>ДД:</h3>
+    {% with dd_table as table %}
+        {% include 'extra_ep/raids/static_table_snippet.html' %}
+    {% endwith %}
+
+    {% if can_add_dd %}
+        <form method="post" action="{% url 'extra_ep:add_character_to_static' object.id %}">
+            {% csrf_token %}
+            {{ add_to_static_form }}
+            <input type="submit" name="dd" value="Добавить" class="btn btn-primary">
+        </form>
+    {% endif %}
+
+    {% if is_static_full %}
+        <h1 class="text-warning">Статик полностью заполнен!</h1>
+    {% endif %}
+{% endblock %}

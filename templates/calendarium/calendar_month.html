@@ -3,12 +3,23 @@
 
 {% block main %}
 <h1>{{ date|date:"F Y" }}</h1>
-<form action="." method="post">
-    {% csrf_token %}
-    <input class="btn btn-default" type="submit" name="previous" value="{% trans "Previous" %}" />
-    <input class="btn btn-default" type="submit" name="next" value="{% trans "Next" %}" />
-    <input class="btn btn-default" type="submit" name="today" value="{% trans "Today" %}" />
-</form>
+<div class="row">
+    <div class="col-3">
+        <form action="." method="post">
+            {% csrf_token %}
+            <input class="btn btn-primary" type="submit" name="previous" value="{% trans "Previous" %}" />
+            <input class="btn btn-primary" type="submit" name="next" value="{% trans "Next" %}" />
+            <input class="btn btn-primary" type="submit" name="today" value="{% trans "Today" %}" />
+        </form>
+    </div>
+    <div class="col-6"></div>
+    <div class="col-3">
+        {% if request.user.is_staff %}
+            <a href="{% url 'extra_ep:add_static' %}" class="btn btn-info">Добавить статик</a>
+        {% endif %}
+        <a href="{% url 'extra_ep:static_list' %}" class="btn btn-info">Список статиков</a>
+    </div>
+</div>
 <table class="table" id="calendar-month">
     <tr>
         <th></th>

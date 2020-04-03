@@ -7,7 +7,7 @@ from django.utils.functional import cached_property
 
 from core.constants import ENCOUNTERS, ITEM_ID_TO_BONUS_EP, SPELL_TO_ITEM_MAP, TANKS, LIMITS
 from core.utils import parse_datetime_str
-from extra_ep.models import Combat, ItemConsumption, Player, Report
+from extra_ep.models import Combat, ItemConsumption, Character, Report
 
 
 class ReportImporter:
@@ -77,19 +77,19 @@ class ReportImporter:
                 combat__report_id=self.report_id,
                 item_id=item_id,
             ).order_by().values(
-                'player_id',
+                'character_id',
             ).annotate(
                 amount=Count('item_id'),
             ).filter(
                 amount__gt=amount,
             ).values_list(
-                'player_id', 'amount',
+                'character_id', 'amount',
             )
 
-            for player_id, total_amount in qs:
+            for character_id, total_amount in qs:
                 item_consumptions_qs = ItemConsumption.objects.filter(
                     combat__report_id=self.report_id,
-                    player_id=player_id,
+                    character_id=character_id,
                     item_id=item_id,
                 ).order_by('-id')[:total_amount - amount]
                 for item_consumption in item_consumptions_qs:
@@ -106,8 +106,8 @@ class ReportImporter:
 
     @classmethod
     def _make_item_consumption(cls, row: List[str], combat: Combat) -> None:
-        player_name = row[2]
-        if not player_name.endswith('-РокДелар'):
+        character_name = row[2]
+        if not character_name.endswith('-РокДелар'):
             return
 
         spell_id = int(row[9])
@@ -118,12 +118,12 @@ class ReportImporter:
 
         datetime_str, event = row[0].split('  ')
         time = parse_datetime_str(datetime_str)
-        player_name = player_name[:-len('-РокДелар')]
-        bonus_ep = cls._get_item_bonus_ep(item_id, player_name)
-        player, _ = Player.objects.get_or_create(name=player_name)
+        character_name = character_name[:-len('-РокДелар')]
+        bonus_ep = cls._get_item_bonus_ep(item_id, character_name)
+        character, _ = Character.objects.get_or_create(name=character_name)
         ItemConsumption.objects.create(
             combat_id=combat.id,
-            player=player,
+            character=character,
             spell_id=spell_id,
             item_id=item_id,
             ep=bonus_ep,
@@ -131,8 +131,8 @@ class ReportImporter:
         )
 
     @staticmethod
-    def _get_item_bonus_ep(item_id, player_name) -> int:
-        if item_id == 13510 and player_name in TANKS:
+    def _get_item_bonus_ep(item_id, character_name) -> int:
+        if item_id == 13510 and character_name in TANKS:
             return 0
 
         return ITEM_ID_TO_BONUS_EP[item_id]

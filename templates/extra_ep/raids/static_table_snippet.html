@@ -1,0 +1,9 @@
+<table class="raid-table">
+    {% for row in table %}
+        <tr>
+            {% for col in row %}
+                <td class="class-unknown">{{ col.name }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>

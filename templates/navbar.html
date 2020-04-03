@@ -22,6 +22,7 @@
     <div class="my-2 my-lg-0">
         {%  if not request.user.is_anonymous %}
             <span>Привет, {{ request.user }}!</span>
+            <a href="{% url 'extra_ep:profile' %}" class="btn btn-info">Персонажи</a>
             <a href="{% url 'auth:logout' %}" class="btn btn-danger">Выйти</a>
         {% else %}
             <a href="{% url 'auth:login' %}" class="btn btn-success">Войти</a>

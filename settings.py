@@ -32,6 +32,7 @@ ALLOWED_HOSTS: List[str] = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_select2',
     'extra_ep',
     'filer',
     'mptt',

@@ -48,3 +48,53 @@ body {
 .false {
     color: red;
 }
+
+.true {
+    color: green;
+}
+
+.raid-table {
+    text-align: center;
+}
+
+.raid-table, .raid-table tr, .raid-table td {
+    border: 1px solid;
+}
+
+.raid-table td {
+    width: 100px;
+}
+
+.class-druid {
+    background-color: #FF7D0A;
+}
+.class-hunter {
+    background-color: #A9D271;
+}
+.class-mage {
+    background-color: #40C7EB;
+}
+.class-monk {
+    background-color: #00FF96;
+}
+.class-paladin {
+    background-color: #F58CBA;
+}
+.class-priest {
+    background-color: #FFFFFF;
+}
+.class-rogue {
+    background-color: #FFF569;
+}
+.class-shaman {
+    background-color: #0070DE;
+}
+.class-warlock {
+    background-color: #8787ED;
+}
+.class-warrior {
+    background-color: #C79C6E;
+}
+.class-unknown {
+    background-color: gray;
+}

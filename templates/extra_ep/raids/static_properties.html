@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ form.media.css }}
+{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Сохранить" class="btn btn-primary">
+    </form>
+{% endblock %}
+
+{% block js %}
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"
+            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+            crossorigin="anonymous">
+    </script>
+    {{ form.media.js }}
+{% endblock %}

@@ -24,7 +24,7 @@ class ItemConsumptionTable(tables.Table):
 
     class Meta:
         model = ItemConsumption
-        fields = ('player', 'item_link', 'used_at', 'ep')
+        fields = ('character', 'item_link', 'used_at', 'ep')
         per_page = 100
 
 
@@ -105,7 +105,7 @@ class ItemConsumptionTotalTable(ItemConsumptionTable):
     class Meta:
         model = ItemConsumption
         per_page = 100
-        fields = ('player', 'item_link', 'count', 'ep')
+        fields = ('character', 'item_link', 'count', 'ep')
 
 
 class ItemConsumptionTotalListView(tables.SingleTableView):
@@ -122,15 +122,15 @@ class ItemConsumptionTotalListView(tables.SingleTableView):
         qs = ItemConsumption.objects.filter(
             combat__report=self.report,
         ).order_by(
-            'player__name',
+            'character__name',
             'item_id',
         ).values(
-            'player__name',
+            'character__name',
             'item_id',
         ).annotate(
             ep=Sum('ep'),
             count=Count('id'),
-            player=F('player__name'),
+            character=F('character__name'),
         )
         return qs
 
