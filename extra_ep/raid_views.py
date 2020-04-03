@@ -3,6 +3,7 @@ from itertools import zip_longest
 
 import django_tables2 as tables
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum, Count, Subquery, OuterRef, F
 from django.db.models.functions import Coalesce
 from django.forms import ModelMultipleChoiceField
@@ -32,12 +33,24 @@ class CreateOrUpdateStaticForm(forms.ModelForm):
             'raid_leader',
             'tanks',
             'max_tanks',
+            'healers',
             'max_healers',
+            'damage_dealers',
             'max_damage_dealers',
             'max_total',
         )
         widgets = {
             'tanks': ModelSelect2MultipleWidget(
+                model=Character,
+                search_fields=['name__icontains'],
+                attrs={'style': 'width: 200px;'},
+            ),
+            'healers': ModelSelect2MultipleWidget(
+                model=Character,
+                search_fields=['name__icontains'],
+                attrs={'style': 'width: 200px;'},
+            ),
+            'damage_dealers': ModelSelect2MultipleWidget(
                 model=Character,
                 search_fields=['name__icontains'],
                 attrs={'style': 'width: 200px;'},
@@ -49,7 +62,7 @@ class CreateOrUpdateStaticForm(forms.ModelForm):
         return super().save(commit)
 
 
-class AddStaticView(CreateView):
+class AddStaticView(LoginRequiredMixin, CreateView):
     form_class = CreateOrUpdateStaticForm
     template_name = 'extra_ep/raids/static_properties.html'
     model = RaidTemplate
@@ -68,7 +81,7 @@ class AddStaticView(CreateView):
         return reverse('extra_ep:edit_static', kwargs={'pk': self.object.id})
 
 
-class ChangeStaticView(UpdateView):
+class ChangeStaticView(LoginRequiredMixin, UpdateView):
     form_class = CreateOrUpdateStaticForm
     template_name = 'extra_ep/raids/static_properties.html'
     model = RaidTemplate
@@ -158,22 +171,24 @@ class EditStaticView(DetailView):
 
         ppl_total = self.object.tanks.count() + self.object.healers.count() + self.object.damage_dealers.count()
         is_static_full = ppl_total >= self.object.max_total
+        can_join = not is_static_full and not self.request.user.is_anonymous
+
         context['is_static_full'] = is_static_full
 
         context['tanks_table'] = self._make_context_table(self.object.tanks.all())
-        context['can_add_tanks'] = not is_static_full and (self.object.tanks.count() < self.object.max_tanks)
+        context['can_add_tanks'] = can_join and (self.object.tanks.count() < self.object.max_tanks)
 
         context['healers_table'] = self._make_context_table(self.object.healers.all())
-        context['can_add_healers'] = not is_static_full and (
+        context['can_add_healers'] = can_join and (
             self.object.healers.count() < self.object.max_healers
         )
 
         context['dd_table'] = self._make_context_table(self.object.damage_dealers.all())
-        context['can_add_dd'] = not is_static_full and (
+        context['can_add_dd'] = can_join and (
             self.object.damage_dealers.count() < self.object.max_damage_dealers
         )
 
-        context['add_to_static_form'] = AddToStaticForm(request=self.request)
+        context['add_to_static_form'] = can_join and AddToStaticForm(request=self.request)
         return context
 
     @staticmethod

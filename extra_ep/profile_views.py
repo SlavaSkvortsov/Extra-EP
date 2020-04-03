@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponseRedirect
@@ -37,7 +39,7 @@ class AddCharacterForm(forms.ModelForm):
         return self.instance
 
 
-class DeattachCharacterView(DeleteView):
+class DeattachCharacterView(LoginRequiredMixin, DeleteView):
     model = Character
     success_url = reverse_lazy('extra_ep:profile')
     template_name = 'extra_ep/profile/deattach_character.html'
@@ -56,12 +58,23 @@ class DeattachCharacterView(DeleteView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class SetClassView(UpdateView):
+class SetClassForm(forms.ModelForm):
+    class Meta:
+        model = Character
+        fields = ('klass', )
+
+
+class SetClassView(LoginRequiredMixin, UpdateView):
+    form_class = SetClassForm
     model = Character
     success_url = reverse_lazy('extra_ep:profile')
 
+    def get_success_url(self):
+        messages.add_message(self.request, messages.INFO, 'Класс успешно изменен')
+        return super().get_success_url()
 
-class ProfileView(FormView):
+
+class ProfileView(LoginRequiredMixin, FormView):
     form_class = AddCharacterForm
     template_name = 'extra_ep/profile/profile.html'
     success_url = reverse_lazy('extra_ep:profile')
@@ -73,7 +86,10 @@ class ProfileView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['characters'] = Character.objects.filter(user=self.request.user)
+        context['characters'] = [
+            {'character': character, 'form': SetClassForm(instance=character)}
+            for character in Character.objects.filter(user=self.request.user)
+        ]
         return context
 
     def post(self, request, *args, **kwargs):

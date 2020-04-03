@@ -14,7 +14,8 @@ urlpatterns = [
     path(r'report/', views.ReportListView.as_view(), name='report_list'),
 
     path(r'profile/', profile_views.ProfileView.as_view(), name='profile'),
-    path(r'profile/deattach_character/<int:character_id>', profile_views.DeattachCharacterView.as_view(), name='deattach_character'),
+    path(r'profile/deattach_character/<int:character_id>/', profile_views.DeattachCharacterView.as_view(), name='deattach_character'),
+    path(r'profile/character/<int:pk>/set_class/', profile_views.SetClassView.as_view(), name='set_class'),
 
     path('calendar/static/', raid_views.StaticListView.as_view(), name='static_list'),
     path('calendar/static/<int:pk>/edit/', raid_views.ChangeStaticView.as_view(), name='edit_static_properties'),

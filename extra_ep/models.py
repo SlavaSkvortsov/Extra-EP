@@ -88,13 +88,19 @@ class RaidTemplate(BaseModel):
         'extra_ep.Character', on_delete=models.CASCADE, verbose_name='РЛ', related_name='+',
     )
 
-    tanks = models.ManyToManyField('extra_ep.Character', verbose_name='Танки', related_name='+')
+    tanks = models.ManyToManyField(
+        'extra_ep.Character', verbose_name='Танки', related_name='+', blank=True,
+    )
     max_tanks = models.IntegerField(verbose_name='Максисум танков')
 
-    healers = models.ManyToManyField('extra_ep.Character', verbose_name='Хилы', related_name='+')
+    healers = models.ManyToManyField(
+        'extra_ep.Character', verbose_name='Хилы', related_name='+', blank=True,
+    )
     max_healers = models.IntegerField(verbose_name='Максисум хилов')
 
-    damage_dealers = models.ManyToManyField('extra_ep.Character', verbose_name='ДД', related_name='+')
+    damage_dealers = models.ManyToManyField(
+        'extra_ep.Character', verbose_name='ДД', related_name='+', blank=True,
+    )
     max_damage_dealers = models.IntegerField(verbose_name='Максисум ДД')
 
     max_total = models.IntegerField(verbose_name='Максисум игроков в рейде')

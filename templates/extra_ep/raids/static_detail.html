@@ -7,7 +7,9 @@
         </div>
         <div class="col-7"></div>
         <div class="col-2">
-            <a href="{% url 'extra_ep:edit_static_properties' object.id %}" class="btn btn-info">Редактировать</a>
+            {% if request.user.is_staff %}
+                <a href="{% url 'extra_ep:edit_static_properties' object.id %}" class="btn btn-info">Редактировать</a>
+            {% endif %}
         </div>
     </div>
         <h4>РЛ <span class="class-{{ object.raid_leader.class }}">{{ object.raid_leader }}</span></h4>
@@ -53,5 +55,7 @@
 
     {% if is_static_full %}
         <h1 class="text-warning">Статик полностью заполнен!</h1>
+    {% elif request.user.is_anonymous %}
+        <h1 class="text-warning">Войдите чтобы записаться!</h1>
     {% endif %}
 {% endblock %}

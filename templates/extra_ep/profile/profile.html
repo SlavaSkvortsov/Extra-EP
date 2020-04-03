@@ -6,12 +6,23 @@
     {% else %}
         <h2>У Вас пока не добавлено ни одного персонажа!</h2>
     {% endif %}
-    {% for character in characters %}
-        <p>
-            {{ character.name }} <a class="false" href="{% url 'extra_ep:deattach_character' character_id=character.id %}">✘</a>
-        </p>
+    {% for data in characters %}
+        <div class="row">
+            <div class="col-1">
+                {{ data.character.name }}
+                <a class="false" href="{% url 'extra_ep:deattach_character' character_id=data.character.id %}">✘</a>
+            </div>
+            <div class="col-3">
+                <form method="post" action="{% url 'extra_ep:set_class' data.character.id %}">
+                    {% csrf_token %}
+                    {{ data.form }}
+                    <input type="submit" value="Изменить" class="btn btn-primary">
+                </form>
+            </div>
+        </div>
     {% endfor %}
-
+    <br/>
+    <br/>
     <form method="post" action="">
         {% csrf_token %}
         {{ form.name.label }}: {{ form.name }} {{ form.name.errors }}
