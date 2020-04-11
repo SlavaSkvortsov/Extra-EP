@@ -45,6 +45,40 @@ body {
     background: #272B30;
 }
 
+.class-druid {
+    background-color: #FF7D0A;
+}
+.class-hunter {
+    background-color: #A9D271;
+}
+.class-mage {
+    background-color: #40C7EB;
+}
+.class-monk {
+    background-color: #00FF96;
+}
+.class-paladin {
+    background-color: #F58CBA;
+}
+.class-priest {
+    background-color: #FFFFFF;
+}
+.class-rogue {
+    background-color: #FFF569;
+}
+.class-shaman {
+    background-color: #0070DE;
+}
+.class-warlock {
+    background-color: #8787ED;
+}
+.class-warrior {
+    background-color: #C79C6E;
+}
+.class-unknown {
+    background-color: gray;
+}
+
 .false {
     color: red;
 }
