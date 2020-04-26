@@ -1,6 +1,7 @@
 import codecs
 from typing import Any, Dict
 
+import chardet
 import django_tables2 as tables
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import QuerySet, Sum, Count, F
@@ -178,9 +179,14 @@ class CreateReportView(CreateView):
 
     def form_valid(self, form):
         result = super().form_valid(form)
+
+        chardet_result = chardet.detect(form.files['log_file'].file.read(1000))
+        encoding = chardet_result['encoding']
+        form.files['log_file'].file.seek(0)
+
         importer = ReportImporter(
             report_id=self.object.id,
-            log_file=codecs.iterdecode(form.files['log_file'].file, 'utf-8'),
+            log_file=codecs.iterdecode(form.files['log_file'].file, encoding),
         )
         importer.process()
         return result
