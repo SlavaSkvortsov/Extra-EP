@@ -22,7 +22,7 @@ class Report(BaseModel):
     static = models.IntegerField(
         verbose_name='Статик',
         default=1,
-        choices=((1, 'Первый'), (2, 'Второй'), (2, 'Третий')),
+        choices=((1, 'Первый'), (2, 'Второй'), (3, 'Третий')),
         null=False,
     )
     raid_day = models.DateField(verbose_name='День рейда', null=True)
