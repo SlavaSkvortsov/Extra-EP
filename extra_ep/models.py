@@ -19,7 +19,12 @@ class Player(BaseModel):
 
 class Report(BaseModel):
     uploaded_by = models.ForeignKey('auth.User', verbose_name='Загрузил', on_delete=models.CASCADE)
-    static = models.IntegerField(verbose_name='Статик', default=1, choices=((1, 'Первый'), (2, 'Второй')), null=False)
+    static = models.IntegerField(
+        verbose_name='Статик',
+        default=1,
+        choices=((1, 'Первый'), (2, 'Второй'), (2, 'Третий')),
+        null=False,
+    )
     raid_day = models.DateField(verbose_name='День рейда', null=True)
     raid_name = models.CharField(verbose_name='Рейд', max_length=200, null=True)
     flushed = models.BooleanField(verbose_name='Очки начислены', default=False)

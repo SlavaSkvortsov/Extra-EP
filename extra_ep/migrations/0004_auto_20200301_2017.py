@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='report',
             name='static',
-            field=models.IntegerField(choices=[(1, 'Первый'), (2, 'Второй')], default=1, verbose_name='Статик'),
+            field=models.IntegerField(choices=[(1, 'Первый'), (2, 'Второй'), (2, 'Третий')], default=1, verbose_name='Статик'),
         ),
         migrations.AlterField(
             model_name='report',
