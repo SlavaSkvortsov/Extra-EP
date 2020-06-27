@@ -11,7 +11,6 @@ from extra_ep.models import Report
 
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
 
     def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument('log_path', type=str)

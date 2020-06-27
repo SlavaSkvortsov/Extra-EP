@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.db import models
 
 
@@ -10,11 +12,109 @@ class BaseModel(models.Model):
         abstract = True
 
 
+class Boss(BaseModel):
+    name = models.CharField(max_length=30)
+    encounter_id = models.IntegerField(unique=True, verbose_name='ID боя. Гуглите encounter id')
+    raid = models.ForeignKey('extra_ep.Raid', on_delete=models.CASCADE)
+    raid_end = models.BooleanField(verbose_name='Конец рейда', default=False)
+
+    def __str__(self):
+        return self.name
+
+
+class Raid(BaseModel):
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.name
+
+
 class Player(BaseModel):
     name = models.CharField(null=False, max_length=30, unique=True)
+    role = models.ForeignKey('extra_ep.Role', on_delete=models.SET_NULL, null=True)
+    klass = models.ForeignKey('extra_ep.Class', on_delete=models.SET_NULL, null=True)
 
     def __str__(self) -> str:
         return self.name
+
+
+class Role(BaseModel):
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.name
+
+
+class Class(BaseModel):
+    name = models.CharField(max_length=30)
+    color = models.CharField(verbose_name='Цвет (hex RGB)', max_length=6)
+
+    def __str__(self):
+        return self.name
+
+
+class ConsumablesSet(BaseModel):
+    role = models.ForeignKey('extra_ep.Role', on_delete=models.CASCADE)
+    klass = models.ForeignKey('extra_ep.Class', on_delete=models.CASCADE)
+
+    # TODO raid could be added here
+
+    consumables = models.ManyToManyField('extra_ep.Consumable')
+    groups = models.ManyToManyField('extra_ep.ConsumableGroup')
+
+    class Meta:
+        unique_together = ('role', 'klass')
+
+
+class Consumable(BaseModel):
+    spell_id = models.IntegerField(verbose_name='ID заклинания', unique=True)
+    item_id = models.IntegerField(verbose_name='ID предмета', unique=True)
+
+    name = models.CharField(max_length=30, null=True, blank=True)
+
+    points_for_usage = models.BooleanField(
+        verbose_name='Давать очки за применение (без учета времени)',
+        default=False,
+    )
+
+    points = models.IntegerField(verbose_name='Очки')
+
+    def __str__(self):
+        return self.name if self.name else 'Укажи, бля, имя, а то хуйня какая-то'
+
+
+class ConsumableGroup(BaseModel):
+    name = models.CharField(verbose_name='Имя группы', max_length=30)
+    points = models.IntegerField(verbose_name='Очки')
+    consumables = models.ManyToManyField('extra_ep.Consumable')
+
+    def __str__(self):
+        return self.name
+
+
+class RaidRun(BaseModel):
+    report = models.ForeignKey('extra_ep.Report', on_delete=models.CASCADE)
+    raid = models.ForeignKey('extra_ep.Raid', on_delete=models.SET_NULL, null=True)
+    begin = models.DateTimeField(null=True)
+    end = models.DateTimeField(null=True)
+
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'Забег в {self.raid} {self.begin.date().isoformat()}'
+
+
+class ConsumableUsage(BaseModel):
+    raid_run = models.ForeignKey('extra_ep.RaidRun', on_delete=models.CASCADE)
+    player = models.ForeignKey('extra_ep.Player', on_delete=models.CASCADE)
+
+    consumable = models.ForeignKey('extra_ep.Consumable', on_delete=models.CASCADE)
+
+    begin = models.DateTimeField()
+    end = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.player} съел {self.consumable} в {self.raid_run.raid}'
 
 
 class Report(BaseModel):
