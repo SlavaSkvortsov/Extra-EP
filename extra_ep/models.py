@@ -15,11 +15,15 @@ class BaseModel(models.Model):
 class Boss(BaseModel):
     name = models.CharField(max_length=30)
     encounter_id = models.IntegerField(unique=True, verbose_name='ID боя. Гуглите encounter id')
-    raid = models.ForeignKey('extra_ep.Raid', on_delete=models.CASCADE)
+    raid = models.ForeignKey('extra_ep.Raid', verbose_name='Рейд', on_delete=models.CASCADE)
     raid_end = models.BooleanField(verbose_name='Конец рейда', default=False)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = 'Босс'
+        verbose_name_plural = 'Боссы'
 
 
 class Raid(BaseModel):
@@ -28,14 +32,22 @@ class Raid(BaseModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'Рейд'
+        verbose_name_plural = 'Рейды'
+
 
 class Player(BaseModel):
     name = models.CharField(null=False, max_length=30, unique=True)
-    role = models.ForeignKey('extra_ep.Role', on_delete=models.SET_NULL, null=True)
-    klass = models.ForeignKey('extra_ep.Class', on_delete=models.SET_NULL, null=True)
+    role = models.ForeignKey('extra_ep.Role', verbose_name='Роль', on_delete=models.SET_NULL, null=True)
+    klass = models.ForeignKey('extra_ep.Class', verbose_name='Класс', on_delete=models.SET_NULL, null=True)
 
     def __str__(self) -> str:
         return self.name
+
+    class Meta:
+        verbose_name = 'Игрок'
+        verbose_name_plural = 'Игроки'
 
 
 class Role(BaseModel):
@@ -43,6 +55,10 @@ class Role(BaseModel):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = 'Роль'
+        verbose_name_plural = 'Роли'
 
 
 class Class(BaseModel):
@@ -52,10 +68,14 @@ class Class(BaseModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'Класс'
+        verbose_name_plural = 'Классы'
+
 
 class ConsumablesSet(BaseModel):
-    role = models.ForeignKey('extra_ep.Role', on_delete=models.CASCADE)
-    klass = models.ForeignKey('extra_ep.Class', on_delete=models.CASCADE)
+    role = models.ForeignKey('extra_ep.Role', verbose_name='Роль', on_delete=models.CASCADE)
+    klass = models.ForeignKey('extra_ep.Class', verbose_name='Класс', on_delete=models.CASCADE)
 
     # TODO raid could be added here
 
@@ -64,6 +84,8 @@ class ConsumablesSet(BaseModel):
 
     class Meta:
         unique_together = ('role', 'klass')
+        verbose_name = 'Набор расходников'
+        verbose_name_plural = 'Наборы расходников'
 
     def __str__(self):
         return f'{self.klass} - {self.role}'
@@ -85,12 +107,20 @@ class Consumable(BaseModel):
     def __str__(self):
         return self.name or 'Укажи, бля, имя, а то хуйня какая-то'
 
+    class Meta:
+        verbose_name = 'Расходник'
+        verbose_name_plural = 'Расходники'
+
 
 class ConsumableUsageLimit(BaseModel):
-    consumable = models.ForeignKey('extra_ep.Consumable', on_delete=models.CASCADE)
-    raid = models.ForeignKey('extra_ep.Raid', on_delete=models.CASCADE)
+    consumable = models.ForeignKey('extra_ep.Consumable', verbose_name='Расходник', on_delete=models.CASCADE)
+    raid = models.ForeignKey('extra_ep.Raid', verbose_name='Рейд', on_delete=models.CASCADE)
 
     limit = models.IntegerField(verbose_name='Сколько за рейд можно съесть')
+
+    class Meta:
+        verbose_name = 'Лимит расходника'
+        verbose_name_plural = 'Лимиты расходников'
 
 
 class ConsumableGroup(BaseModel):
@@ -101,10 +131,14 @@ class ConsumableGroup(BaseModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'Группа расходников'
+        verbose_name_plural = 'Группы расходников'
+
 
 class RaidRun(BaseModel):
-    report = models.ForeignKey('extra_ep.Report', on_delete=models.CASCADE)
-    raid = models.ForeignKey('extra_ep.Raid', on_delete=models.SET_NULL, null=True)
+    report = models.ForeignKey('extra_ep.Report', verbose_name='Отчет', on_delete=models.CASCADE)
+    raid = models.ForeignKey('extra_ep.Raid', verbose_name='Рейд', on_delete=models.SET_NULL, null=True)
     begin = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
 
@@ -121,18 +155,26 @@ class RaidRun(BaseModel):
     def duration(self) -> timedelta:
         return self.end - self.begin
 
+    class Meta:
+        verbose_name = 'Поход в рейд'
+        verbose_name_plural = 'Походы в рейды'
+
 
 class ConsumableUsage(BaseModel):
-    raid_run = models.ForeignKey('extra_ep.RaidRun', on_delete=models.CASCADE)
-    player = models.ForeignKey('extra_ep.Player', on_delete=models.CASCADE)
+    raid_run = models.ForeignKey('extra_ep.RaidRun', verbose_name='Поход в рейд', on_delete=models.CASCADE)
+    player = models.ForeignKey('extra_ep.Player', verbose_name='Игрок', on_delete=models.CASCADE)
 
-    consumable = models.ForeignKey('extra_ep.Consumable', on_delete=models.CASCADE)
+    consumable = models.ForeignKey('extra_ep.Consumable', verbose_name='Расходник', on_delete=models.CASCADE)
 
     begin = models.DateTimeField()
     end = models.DateTimeField()
 
     def __str__(self):
         return f'{self.player} съел {self.consumable} в {self.raid_run.raid}'
+
+    class Meta:
+        verbose_name = 'Использование расходника'
+        verbose_name_plural = 'Использование расходников'
 
 
 class Report(BaseModel):
@@ -146,6 +188,10 @@ class Report(BaseModel):
     raid_day = models.DateField(verbose_name='День рейда', null=True)
     raid_name = models.CharField(verbose_name='Рейд', max_length=200, null=True)
     flushed = models.BooleanField(verbose_name='Очки начислены', default=False)
+
+    class Meta:
+        verbose_name = 'Отчет'
+        verbose_name_plural = 'Отчеты'
 
 
 class Combat(BaseModel):
