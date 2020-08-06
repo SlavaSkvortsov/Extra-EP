@@ -1,4 +1,4 @@
-from typing import Optional
+from datetime import timedelta
 
 from django.db import models
 
@@ -59,11 +59,14 @@ class ConsumablesSet(BaseModel):
 
     # TODO raid could be added here
 
-    consumables = models.ManyToManyField('extra_ep.Consumable')
-    groups = models.ManyToManyField('extra_ep.ConsumableGroup')
+    consumables = models.ManyToManyField('extra_ep.Consumable', blank=True)
+    groups = models.ManyToManyField('extra_ep.ConsumableGroup', blank=True)
 
     class Meta:
         unique_together = ('role', 'klass')
+
+    def __str__(self):
+        return f'{self.klass} - {self.role}'
 
 
 class Consumable(BaseModel):
@@ -80,7 +83,14 @@ class Consumable(BaseModel):
     points = models.IntegerField(verbose_name='Очки')
 
     def __str__(self):
-        return self.name if self.name else 'Укажи, бля, имя, а то хуйня какая-то'
+        return self.name or 'Укажи, бля, имя, а то хуйня какая-то'
+
+
+class ConsumableUsageLimit(BaseModel):
+    consumable = models.ForeignKey('extra_ep.Consumable', on_delete=models.CASCADE)
+    raid = models.ForeignKey('extra_ep.Raid', on_delete=models.CASCADE)
+
+    limit = models.IntegerField(verbose_name='Сколько за рейд можно съесть')
 
 
 class ConsumableGroup(BaseModel):
@@ -98,10 +108,18 @@ class RaidRun(BaseModel):
     begin = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
 
+    required_uptime = models.FloatField(default=0.85)
+    minimum_uptime = models.FloatField(default=0.5)
+    points_coefficient = models.FloatField(default=1)
+
     active = models.BooleanField(default=True)
 
     def __str__(self):
         return f'Забег в {self.raid} {self.begin.date().isoformat()}'
+
+    @property
+    def duration(self) -> timedelta:
+        return self.end - self.begin
 
 
 class ConsumableUsage(BaseModel):

@@ -2,13 +2,12 @@ import csv
 from collections import defaultdict
 from datetime import datetime
 from functools import lru_cache
-from typing import List, TextIO, Any, Dict
+from typing import Any, Dict, List, TextIO
 
 from django.utils.functional import cached_property
-from django_registration.forms import User
 
 from core.utils import parse_datetime_str
-from extra_ep.models import Player, RaidRun, Boss, ConsumableUsage, Consumable, Report
+from extra_ep.models import Boss, Consumable, ConsumableUsage, Player, RaidRun, Report
 
 
 class ReportImporter:
@@ -25,7 +24,7 @@ class ReportImporter:
 
         for row in csv.reader(self.log_file):
             if raid_run is None:
-                raid_run = self._create_unknown_raid()
+                raid_run = self._create_unknown_raid_run()
 
             datetime_str, event = row[0].split('  ')
 
@@ -46,7 +45,7 @@ class ReportImporter:
                     raid_run.end = parse_datetime_str(datetime_str)
                     raid_run.save()
 
-                    raid_run = self._create_unknown_raid()
+                    raid_run = self._create_unknown_raid_run()
                     raid_run.raid_id = boss.raid_id
                     raid_run.save()
 
@@ -69,7 +68,7 @@ class ReportImporter:
                     self._finalize_current_run(time)
                     raid_run = None
 
-            elif event == 'SPELL_AURA_APPLIED':
+            elif event in ('SPELL_AURA_APPLIED', 'SPELL_CAST_START'):
                 self._make_consumable_usage(row, raid_run, parse_datetime_str(datetime_str))
 
             elif event == 'SPELL_AURA_REMOVED':
@@ -83,6 +82,20 @@ class ReportImporter:
             else:
                 raid_run.delete()
 
+        self._postprocess_report()
+
+    def _postprocess_report(self):
+        qs = RaidRun.objects.filter(report_id=self.report_id)
+        if not qs.exists():
+            return
+
+        raid_runs = list(qs)
+        report = Report.objects.get(id=self.report_id)
+        report.raid_day = next((raid_run.begin for raid_run in raid_runs if raid_run.begin), None)
+        report.raid_name = ', '.join(str(raid_run.raid) for raid_run in raid_runs if raid_run.raid_id)
+
+        report.save()
+
     def _finalize_current_run(self, time: datetime):
         for consumables in self._unfinished_consumables.values():
             for cons_usage in consumables.values():
@@ -91,7 +104,7 @@ class ReportImporter:
 
         self._unfinished_consumables = defaultdict(dict)
 
-    def _create_unknown_raid(self) -> RaidRun:
+    def _create_unknown_raid_run(self) -> RaidRun:
         return RaidRun.objects.create(
             report_id=self.report_id,
         )

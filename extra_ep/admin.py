@@ -1,7 +1,9 @@
 from django.contrib import admin
 
-from extra_ep.models import Report, ItemConsumption, Combat, Boss, Raid, Player, Role, Class, ConsumablesSet, \
-    Consumable, ConsumableGroup, RaidRun, ConsumableUsage
+from extra_ep.models import (
+    Boss, Class, Consumable, ConsumableGroup, ConsumableUsage, ConsumablesSet, Player, Raid,
+    RaidRun, Report, Role
+)
 
 
 @admin.register(Report)
@@ -66,4 +68,4 @@ class RaidRunAdmin(admin.ModelAdmin):
 
 @admin.register(ConsumableUsage)
 class ConsumableUsageAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('raid_run', 'player', 'consumable')

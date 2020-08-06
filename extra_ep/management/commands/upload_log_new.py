@@ -12,7 +12,7 @@ from extra_ep.models import Report
 class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
-        log_path = r'C:\Program Files (x86)\World of Warcraft\_classic_\Logs\WoWCombatLog-split-2020-06-16T15-59-28.327Z.txt'
+        log_path = r'C:\Program Files (x86)\World of Warcraft\_classic_\Logs\WoWCombatLog-split-2020-06-04T18-04-37.634Z.txt'
         user, _ = User.objects.get_or_create(email='robot@sasai.kudasai')
         report = Report.objects.create(
             uploaded_by=user,

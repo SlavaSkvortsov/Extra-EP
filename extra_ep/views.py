@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 import chardet
 import django_tables2 as tables
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import QuerySet, Sum, Count, F
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -12,6 +11,7 @@ from django_tables2 import A
 
 from core.export_report import ReportExporter
 from core.import_report import ReportImporter
+from core.import_report_new import ReportImporter as ReportImporterNew
 from extra_ep.forms import ChangeExportedForm, UploadFile
 from extra_ep.models import Combat, ItemConsumption, Report
 
@@ -189,4 +189,12 @@ class CreateReportView(CreateView):
             log_file=codecs.iterdecode(form.files['log_file'].file, encoding),
         )
         importer.process()
+
+        form.files['log_file'].file.seek(0)
+        new_importer = ReportImporterNew(
+            report_id=self.object.id,
+            log_file=codecs.iterdecode(form.files['log_file'].file, encoding),
+        )
+        new_importer.process()
+
         return result

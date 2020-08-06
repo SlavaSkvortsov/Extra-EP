@@ -1,0 +1,42 @@
+{% extends "extra_ep/report/base_report.html" %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block head %}
+    {{ block.super }}
+    <script>var whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true};</script>
+    <script src="https://wow.zamimg.com/widgets/power.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb report.raid_name '' %}
+{% endblock %}
+
+{% block before_table %}
+    <div>
+        {% if request.user.is_staff %}
+            <a href="{% url 'extra_ep:report_export' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
+
+            {% for warning in warnings %}
+                {{ warning }}<br/>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% if report.flushed %}
+        <h1 class="text-success">Отчет уже выгружен!</h1>
+    {% else %}
+        <h1 class="text-warning">Отчет еще не выгружен!</h1>
+    {% endif %}
+    {% if request.user.is_staff %}
+        <form method="post" action="{% url 'extra_ep:change_exported' report_id=report.id %}">
+            {% csrf_token %}
+            {{ change_exported_from.as_p }}
+            {% if report.flushed %}
+                <input type="submit" value="Пометить НЕ выгруженым" class="btn btn-warning">
+            {% else %}
+                <input type="submit" value="Пометить выгруженым" class="btn btn-success">
+            {% endif %}
+        </form>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
