@@ -1,10 +1,8 @@
 from django.contrib import admin
 
 from extra_ep.models import (
-    Boss, Class, Consumable, ConsumableGroup, ConsumableUsage, ConsumablesSet, Player, Raid,
-    RaidRun, Report, Role,
-    Combat,
-    ItemConsumption
+    Boss, Class, Combat, Consumable, ConsumableGroup, ConsumableUsage, ConsumableUsageLimit, ConsumablesSet,
+    ItemConsumption, Player, Raid, RaidRun, Report, Role
 )
 
 
@@ -57,8 +55,15 @@ class ConsumablesSetAdmin(admin.ModelAdmin):
     search_fields = ('consumables__name', 'groups__name')
 
 
+class LimitInline(admin.TabularInline):
+    model = ConsumableUsageLimit
+
+
 @admin.register(Consumable)
 class ConsumableAdmin(admin.ModelAdmin):
+    inlines = [
+        LimitInline,
+    ]
     search_fields = ('spell_id', 'spell_name', 'name', 'points')
     list_filter = ('points_for_usage',)
 
