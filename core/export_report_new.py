@@ -46,13 +46,11 @@ class ExportReport:
 
         player_ids = ConsumableUsage.objects.filter(
             raid_run__report_id=self.report_id,
-        ).order_by().distinct(
-            'player_id',
-        ).values_list('player_id', flat=True)
+        ).order_by().values('player_id').distinct().values_list('player_id', flat=True)
 
         raid_runs = list(RaidRun.objects.filter(report_id=self.report_id))
 
-        for player_id in player_ids:
+        for player_id in set(player_ids):
             player = self._all_players[player_id]
 
             if player.role_id is None:
