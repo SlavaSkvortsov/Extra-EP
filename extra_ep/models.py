@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -28,6 +29,10 @@ class Boss(BaseModel):
 
 class Raid(BaseModel):
     name = models.CharField(max_length=30)
+
+    default_required_uptime = models.FloatField(verbose_name='Необходимый аптайм по умолчанию', default=0.85)
+    default_minimum_uptime = models.FloatField(verbose_name='Минимальный аптайм по умолчанию', default=0.5)
+    default_points_coefficient = models.FloatField(verbose_name='Коэффициент очков по времени по умолчанию', default=1)
 
     def __str__(self):
         return self.name
@@ -97,15 +102,25 @@ class Consumable(BaseModel):
 
     name = models.CharField(max_length=30, null=True, blank=True)
 
-    points_for_usage = models.BooleanField(
-        verbose_name='Давать очки за применение (без учета времени)',
+    usage_based_item = models.BooleanField(
+        verbose_name='Давать очки за использование, а не за время',
         default=False,
     )
 
-    points = models.IntegerField(verbose_name='Очки')
+    points_for_usage = models.IntegerField(verbose_name='Очки за одно использование', blank=False, null=False)
+    points_over_raid = models.IntegerField(verbose_name='Очки за рейд', blank=True, null=True)
+    required = models.BooleanField(verbose_name='Требуется (влияет только на очки за время)', blank=True, default=True)
 
     def __str__(self):
         return self.name or 'Укажи, бля, имя, а то хуйня какая-то'
+
+    def clean(self):
+        if not self.usage_based_item and self.points_over_raid is None:
+            raise ValidationError(
+                'Необходимо указать очки за рейд или поставить галочку "Давать очки за использование"',
+            )
+
+        return super().clean()
 
     class Meta:
         verbose_name = 'Расходник'
@@ -127,6 +142,7 @@ class ConsumableGroup(BaseModel):
     name = models.CharField(verbose_name='Имя группы', max_length=30)
     points = models.IntegerField(verbose_name='Очки')
     consumables = models.ManyToManyField('extra_ep.Consumable')
+    required = models.BooleanField(verbose_name='Требуется', blank=True, default=True)
 
     def __str__(self):
         return self.name
@@ -142,9 +158,9 @@ class RaidRun(BaseModel):
     begin = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
 
-    required_uptime = models.FloatField(default=0.85)
-    minimum_uptime = models.FloatField(default=0.5)
-    points_coefficient = models.FloatField(default=1)
+    required_uptime = models.FloatField(verbose_name='Необходимый аптайм', default=0.85)
+    minimum_uptime = models.FloatField(verbose_name='Минимальный аптайм', default=0.5)
+    points_coefficient = models.FloatField(verbose_name='Коэффициент очков по времени', default=1)
 
     active = models.BooleanField(default=True)
 
@@ -181,17 +197,22 @@ class Report(BaseModel):
     uploaded_by = models.ForeignKey('auth.User', verbose_name='Загрузил', on_delete=models.CASCADE)
     static = models.IntegerField(
         verbose_name='Статик',
-        default=1,
-        choices=((1, 'Первый'), (2, 'Второй'), (3, 'Третий')),
+        default=2,
+        choices=((2, 'Второй'), (3, 'Третий'), (1, 'Первый :(')),
         null=False,
     )
     raid_day = models.DateField(verbose_name='День рейда', null=True)
     raid_name = models.CharField(verbose_name='Рейд', max_length=200, null=True)
     flushed = models.BooleanField(verbose_name='Очки начислены', default=False)
+    is_hard_mode = models.BooleanField(verbose_name='Режим освоения, очки за использование', default=False)
 
     class Meta:
         verbose_name = 'Отчет'
         verbose_name_plural = 'Отчеты'
+        ordering = ['-id']
+
+    def __str__(self) -> str:
+        return f'{self.raid_name} ({self.raid_day})'
 
 
 class Combat(BaseModel):

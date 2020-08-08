@@ -15,11 +15,14 @@
 {% block before_table %}
     <div>
         {% if request.user.is_staff %}
-            <a href="{% url 'extra_ep:report_export' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
-
-            {% for warning in warnings %}
-                {{ warning }}<br/>
-            {% endfor %}
+            {% if warnings %}
+                <h2>Ошибки при построении отчета:</h2>
+                {% for warning in warnings %}
+                    {{ warning }}<br/>
+                {% endfor %}
+            {% else %}
+                <a href="{% url 'extra_ep:report_export' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
+            {% endif %}
         {% endif %}
     </div>
     {% if report.flushed %}
@@ -27,7 +30,7 @@
     {% else %}
         <h1 class="text-warning">Отчет еще не выгружен!</h1>
     {% endif %}
-    {% if request.user.is_staff %}
+    {% if request.user.is_staff and not warnings %}
         <form method="post" action="{% url 'extra_ep:change_exported' report_id=report.id %}">
             {% csrf_token %}
             {{ change_exported_from.as_p }}

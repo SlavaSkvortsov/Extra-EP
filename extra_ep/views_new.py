@@ -83,7 +83,7 @@ class ReportDetailView(tables.SingleTableView):
                         **data,
                     })
 
-        return result
+        return sorted(result, key=lambda row: row['player'].name)
 
 
 class ExportReportView(DetailView):
@@ -111,4 +111,4 @@ class ExportReportView(DetailView):
 
             rows.append(f'{player.name},{points}')
 
-        return '\n'.join(rows)
+        return '\n'.join(sorted(rows))

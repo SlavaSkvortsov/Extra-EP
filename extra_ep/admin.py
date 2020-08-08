@@ -64,8 +64,15 @@ class ConsumableAdmin(admin.ModelAdmin):
     inlines = [
         LimitInline,
     ]
-    search_fields = ('spell_id', 'spell_name', 'name', 'points')
-    list_filter = ('points_for_usage',)
+    search_fields = ('spell_id', 'spell_name', 'name', 'points_for_usage')
+    list_filter = ('usage_based_item',)
+    list_display = (
+        'name',
+        'usage_based_item',
+        'points_for_usage',
+        'points_over_raid',
+        'required',
+    )
 
 
 @admin.register(ConsumableGroup)

@@ -39,6 +39,9 @@ class ReportImporter:
 
                 if raid_run.raid_id is None:
                     raid_run.raid_id = boss.raid_id
+                    raid_run.required_uptime = boss.raid.default_required_uptime
+                    raid_run.minimum_uptime = boss.raid.default_minimum_uptime
+                    raid_run.points_coefficient = boss.raid.default_points_coefficient
                     raid_run.save()
 
                 if raid_run.raid_id != boss.raid_id:

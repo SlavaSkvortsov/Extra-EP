@@ -97,7 +97,7 @@ class ExportReport:
         result: List[BaseConsumableUsageModel] = []
 
         for consumable in required_set.consumables.all():
-            if consumable.points_for_usage:
+            if consumable.usage_based_item or raid_run.report.is_hard_mode:
                 amount = ConsumableUsage.objects.filter(
                     raid_run=raid_run,
                     player=player,
@@ -111,7 +111,7 @@ class ExportReport:
                 if limit_obj:
                     amount = min(amount, limit_obj.limit)
 
-                points = consumable.points * amount
+                points = consumable.points_for_usage * amount
                 result.append(ConsumableUsageModel(
                     points=points,
                     consumable_id=consumable.id,
@@ -121,7 +121,10 @@ class ExportReport:
                 uptime = consumable_uptime[consumable.id]
                 raid_uptime = self._get_raid_uptime(uptime, raid_run)
 
-                points, coeff = self._get_consumable_points(raid_run, raid_uptime, consumable.points)
+                points, coeff = self._get_consumable_points(raid_run, raid_uptime, consumable.points_over_raid)
+                if not consumable.required:
+                    points = max(0, points)
+
                 points = int(round(points * raid_run.points_coefficient))
                 result.append(UptimeConsumableUsageModel(
                     points=points,
@@ -134,7 +137,10 @@ class ExportReport:
             uptime = group_uptime[group.id]
             raid_uptime = self._get_raid_uptime(uptime, raid_run)
 
-            points, coeff = self._get_consumable_points(raid_run, raid_uptime, group.points)
+            points, coeff = self._get_consumable_points(raid_run, raid_uptime, group.points_over_raid)
+            if not group.required:
+                points = max(0, points)
+
             points = int(round(points * raid_run.points_coefficient))
             result.append(UptimeConsumableUsageModel(
                 points=points,
@@ -153,7 +159,7 @@ class ExportReport:
         result = {}
 
         for consumable in required_set.consumables.all():
-            if consumable.points_for_usage:
+            if consumable.usage_based_item:
                 continue
 
             uptime = self._get_consumable_uptime(consumable, player)
