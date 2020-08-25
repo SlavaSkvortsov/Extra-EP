@@ -36,7 +36,7 @@ class RaidAdmin(admin.ModelAdmin):
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
     list_filter = ('klass', 'role')
-    search_fields = ('name', 'klass', 'role')
+    search_fields = ('name', 'klass__name', 'role__name')
 
 
 @admin.register(Role)

@@ -121,9 +121,12 @@ class ExportReport:
                 uptime = consumable_uptime[consumable.id]
                 raid_uptime = self._get_raid_uptime(uptime, raid_run)
 
-                points, coeff = self._get_consumable_points(raid_run, raid_uptime, consumable.points_over_raid)
-                if not consumable.required:
-                    points = max(0, points)
+                points, coeff = self._get_consumable_points(
+                    raid_run=raid_run,
+                    raid_uptime=raid_uptime,
+                    points=consumable.points_over_raid,
+                    required=consumable.required,
+                )
 
                 points = int(round(points * raid_run.points_coefficient))
                 result.append(UptimeConsumableUsageModel(
@@ -137,9 +140,12 @@ class ExportReport:
             uptime = group_uptime[group.id]
             raid_uptime = self._get_raid_uptime(uptime, raid_run)
 
-            points, coeff = self._get_consumable_points(raid_run, raid_uptime, group.points_over_raid)
-            if not group.required:
-                points = max(0, points)
+            points, coeff = self._get_consumable_points(
+                raid_run=raid_run,
+                raid_uptime=raid_uptime,
+                points=group.points_over_raid,
+                required=group.required,
+            )
 
             points = int(round(points * raid_run.points_coefficient))
             result.append(UptimeConsumableUsageModel(
@@ -196,18 +202,28 @@ class ExportReport:
         return raid_uptime
 
     @classmethod
-    def _get_consumable_points(cls, raid_run: RaidRun, raid_uptime: List[Period], points: int) -> Tuple[int, float]:
+    def _get_consumable_points(
+        cls,
+        raid_run: RaidRun,
+        raid_uptime: List[Period],
+        points: int,
+        required: bool,
+    ) -> Tuple[int, float]:
         if not raid_uptime:
-            return - points, 0
+            if required:
+                return - points, 0
+            return 0, 0
+
+        minimum_uptime = raid_run.minimum_uptime if required else 0
 
         total_uptime = cls._get_total_uptime(raid_uptime)
         coefficient = total_uptime.total_seconds() / raid_run.duration.total_seconds()
         if coefficient >= raid_run.required_uptime:
             return points, coefficient
 
-        elif coefficient >= raid_run.minimum_uptime:
-            a = points / (raid_run.required_uptime - raid_run.minimum_uptime)
-            b = - a * raid_run.minimum_uptime
+        elif coefficient >= minimum_uptime:
+            a = points / (raid_run.required_uptime - minimum_uptime)
+            b = - a * minimum_uptime
             return int(round(coefficient * a + b)), coefficient
 
         a = points / raid_run.minimum_uptime

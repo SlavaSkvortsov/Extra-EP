@@ -97,8 +97,8 @@ class ConsumablesSet(BaseModel):
 
 
 class Consumable(BaseModel):
-    spell_id = models.IntegerField(verbose_name='ID заклинания', unique=True)
-    item_id = models.IntegerField(verbose_name='ID предмета', unique=True)
+    spell_id = models.IntegerField(verbose_name='ID заклинания')
+    item_id = models.IntegerField(verbose_name='ID предмета', null=True, blank=True)
 
     name = models.CharField(max_length=30, null=True, blank=True)
 

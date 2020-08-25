@@ -19,6 +19,8 @@ class ReportDetailTable(tables.Table):
         template_code='''
 {% if record.item_id %}
     <a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.classic" >Item</a>
+{% elif record.spell_id %}
+    <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.classic" >Spell</a>
 {% elif record.item_name %}
     {{ record.item_name }}
 {% endif %}
@@ -75,6 +77,10 @@ class ReportDetailView(tables.SingleTableView):
                         'points': usage_model.points,
                         'item_id': (
                             Consumable.objects.get(id=usage_model.consumable_id).item_id
+                            if usage_model.consumable_id else None
+                        ),
+                        'spell_id': (
+                            Consumable.objects.get(id=usage_model.consumable_id).spell_id
                             if usage_model.consumable_id else None
                         ),
                         'group_name': (
