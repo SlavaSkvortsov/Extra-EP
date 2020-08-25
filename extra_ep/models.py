@@ -165,7 +165,7 @@ class RaidRun(BaseModel):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f'Забег в {self.raid} {self.begin.date().isoformat()}'
+        return f'Забег в {self.raid} {self.begin and self.begin.date().isoformat()}'
 
     @property
     def duration(self) -> timedelta:

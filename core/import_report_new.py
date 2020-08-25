@@ -18,6 +18,9 @@ class ReportImporter:
         # player_id: {consumable_id: ConsumableUsage}
         self._unfinished_consumables: Dict[int, Dict[int, ConsumableUsage]] = defaultdict(dict)
 
+        self._player_map: Dict[str, Player] = {}
+        self._player_usage_map: Dict[str, List[ConsumableUsage]] = defaultdict(list)
+
     def process(self) -> None:
         raid_run = None
         datetime_str = None
@@ -77,6 +80,9 @@ class ReportImporter:
             elif event == 'SPELL_AURA_REMOVED':
                 self._finalize_consumable(row, parse_datetime_str(datetime_str))
 
+            elif event == 'COMBATANT_INFO':
+                self._track_combatant_auras(row, raid_run, parse_datetime_str(datetime_str))
+
         if raid_run:
             if raid_run.raid_id is not None:
                 raid_run.end = parse_datetime_str(datetime_str)
@@ -88,6 +94,15 @@ class ReportImporter:
         self._postprocess_report()
 
     def _postprocess_report(self):
+        for player_id, usages in self._player_usage_map.items():
+            player = self._player_map.get(player_id)
+            if player is None:
+                continue
+
+            for usage in usages:
+                usage.player = player
+                usage.save()
+
         qs = RaidRun.objects.filter(report_id=self.report_id)
         if not qs.exists():
             return
@@ -119,6 +134,7 @@ class ReportImporter:
             return
 
         player = self._get_or_create_player(row[2])
+        self._player_map[row[1]] = player
 
         existing_unfinished_usage = self._unfinished_consumables[player.id].get(consumable.id)
         if existing_unfinished_usage is not None:
@@ -133,6 +149,27 @@ class ReportImporter:
         )
         self._unfinished_consumables[player.id][consumable.id] = consumable_usage
 
+    def _track_combatant_auras(self, row: List[Any], raid_run: RaidRun, time: datetime) -> None:
+        auras = row[-1][1:-1]
+
+        for aura_id_str in auras.split(','):
+            try:
+                aura_id = int(aura_id_str)
+            except ValueError:
+                continue
+
+            consumable = self._all_consumables.get(aura_id)
+
+            if consumable is None:
+                continue
+
+            self._player_usage_map[row[1]].append(ConsumableUsage(
+                raid_run=raid_run,
+                consumable=consumable,
+                begin=time,
+                end=time,
+            ))
+
     def _finalize_consumable(self, row: List[Any], time: datetime) -> None:
         consumable = self._all_consumables.get(int(row[9]))
 
@@ -140,6 +177,7 @@ class ReportImporter:
             return
 
         player = self._get_or_create_player(row[2])
+        self._player_map[row[1]] = player
 
         unfinished_usage = self._unfinished_consumables[player.id].get(consumable.id)
         if unfinished_usage is None:
