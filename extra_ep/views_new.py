@@ -1,14 +1,11 @@
-from collections import defaultdict
-from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict
 
+import django_tables2 as tables
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
-import django_tables2 as tables
-from django.views.generic.detail import BaseDetailView
 
-from core.export_report_new import ExportReport, ConsumableUsageModel, UptimeConsumableUsageModel
-from extra_ep.models import Report, Player, RaidRun, ConsumableGroup, Consumable
+from core.export_report_new import ConsumableUsageModel, ExportReport, UptimeConsumableUsageModel
+from extra_ep.models import Consumable, ConsumableGroup, Player, RaidRun, Report
 
 
 class ReportDetailTable(tables.Table):
@@ -30,6 +27,9 @@ class ReportDetailTable(tables.Table):
     amount = tables.Column(verbose_name='Использовано раз')
     uptime = tables.Column(verbose_name='Время действия %')
     points = tables.Column(verbose_name='Очков')
+
+    class Meta:
+        per_page = 200
 
 
 class ReportDetailView(tables.SingleTableView):
