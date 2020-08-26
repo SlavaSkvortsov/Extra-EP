@@ -17,13 +17,12 @@ class ReportDetailTable(tables.Table):
     item_link = tables.TemplateColumn(
         verbose_name='Предмет',
         template_code='''
-        {{ record.item_id }}!!{{ record.spell_id }}!!{{ record.item_name }}
 {% if record.item_id %}
     <a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.classic" >Item</a>
 {% elif record.spell_id %}
     <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.classic" >Spell</a>
 {% elif record.item_name %}
-    {{ record.item_name }}
+    {{ record.group_name }}
 {% endif %}
 ''',
         accessor='item_id',
