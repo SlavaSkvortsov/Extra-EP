@@ -143,7 +143,7 @@ class ExportReport:
             points, coeff = self._get_consumable_points(
                 raid_run=raid_run,
                 raid_uptime=raid_uptime,
-                points=group.points_over_raid,
+                points=group.points,
                 required=group.required,
             )
 
