@@ -10,7 +10,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     {% bootstrap_css %}
     <link rel="shortcut icon" type="image/png" href="{% static 'extra_ep/favicon.ico' %}"/>
-    <link rel="stylesheet" href="{% static "calendarium/css/calendar.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static 'extra_ep/style.css' %}">
     {% block head %}
         <meta charset="UTF-8">
@@ -24,7 +23,6 @@
     {% include "navbar.html" %}
     <div id="page-wrap">
             {% block content %}{% endblock %}
-            {% block main %}{% endblock %}  {# For calendarium #}
     </div>
 {% endblock %}
 </body>

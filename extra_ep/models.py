@@ -14,7 +14,7 @@ class BaseModel(models.Model):
 
 
 class Boss(BaseModel):
-    name = models.CharField(max_length=30)
+    name = models.CharField(verbose_name='Имя', max_length=30)
     encounter_id = models.IntegerField(unique=True, verbose_name='ID боя. Гуглите encounter id')
     raid = models.ForeignKey('extra_ep.Raid', verbose_name='Рейд', on_delete=models.CASCADE)
     raid_end = models.BooleanField(verbose_name='Конец рейда', default=False)
@@ -28,7 +28,7 @@ class Boss(BaseModel):
 
 
 class Raid(BaseModel):
-    name = models.CharField(max_length=30)
+    name = models.CharField(verbose_name='Название', max_length=30)
 
     default_required_uptime = models.FloatField(verbose_name='Необходимый аптайм по умолчанию', default=0.85)
     default_minimum_uptime = models.FloatField(verbose_name='Минимальный аптайм по умолчанию', default=0.5)
@@ -43,7 +43,7 @@ class Raid(BaseModel):
 
 
 class Player(BaseModel):
-    name = models.CharField(null=False, max_length=30, unique=True)
+    name = models.CharField(verbose_name='Имя', null=False, max_length=30, unique=True)
     role = models.ForeignKey('extra_ep.Role', verbose_name='Роль', on_delete=models.SET_NULL, null=True)
     klass = models.ForeignKey('extra_ep.Class', verbose_name='Класс', on_delete=models.SET_NULL, null=True)
 
@@ -56,7 +56,7 @@ class Player(BaseModel):
 
 
 class Role(BaseModel):
-    name = models.CharField(max_length=30)
+    name = models.CharField(verbose_name='Имя', max_length=30)
 
     def __str__(self):
         return self.name
@@ -67,7 +67,7 @@ class Role(BaseModel):
 
 
 class Class(BaseModel):
-    name = models.CharField(max_length=30)
+    name = models.CharField(verbose_name='Имя', max_length=30)
     color = models.CharField(verbose_name='Цвет (hex RGB)', max_length=6)
 
     def __str__(self):
@@ -84,8 +84,8 @@ class ConsumablesSet(BaseModel):
 
     # TODO raid could be added here
 
-    consumables = models.ManyToManyField('extra_ep.Consumable', blank=True)
-    groups = models.ManyToManyField('extra_ep.ConsumableGroup', blank=True)
+    consumables = models.ManyToManyField('extra_ep.Consumable', blank=True, verbose_name='Расходники')
+    groups = models.ManyToManyField('extra_ep.ConsumableGroup', blank=True, verbose_name='Группы расходников')
 
     class Meta:
         unique_together = ('role', 'klass')
@@ -100,7 +100,7 @@ class Consumable(BaseModel):
     spell_id = models.IntegerField(verbose_name='ID заклинания')
     item_id = models.IntegerField(verbose_name='ID предмета', null=True, blank=True)
 
-    name = models.CharField(max_length=30, null=True, blank=True)
+    name = models.CharField(verbose_name='Имя', max_length=30, null=True, blank=True)
 
     usage_based_item = models.BooleanField(
         verbose_name='Давать очки за использование, а не за время',
@@ -141,7 +141,7 @@ class ConsumableUsageLimit(BaseModel):
 class ConsumableGroup(BaseModel):
     name = models.CharField(verbose_name='Имя группы', max_length=30)
     points = models.IntegerField(verbose_name='Очки')
-    consumables = models.ManyToManyField('extra_ep.Consumable')
+    consumables = models.ManyToManyField('extra_ep.Consumable', verbose_name='Расходники')
     required = models.BooleanField(verbose_name='Требуется', blank=True, default=True)
 
     def __str__(self):
@@ -155,14 +155,12 @@ class ConsumableGroup(BaseModel):
 class RaidRun(BaseModel):
     report = models.ForeignKey('extra_ep.Report', verbose_name='Отчет', on_delete=models.CASCADE)
     raid = models.ForeignKey('extra_ep.Raid', verbose_name='Рейд', on_delete=models.SET_NULL, null=True)
-    begin = models.DateTimeField(null=True)
-    end = models.DateTimeField(null=True)
+    begin = models.DateTimeField(verbose_name='Начало', null=True)
+    end = models.DateTimeField(verbose_name='Окончание', null=True)
 
     required_uptime = models.FloatField(verbose_name='Необходимый аптайм', default=0.85)
     minimum_uptime = models.FloatField(verbose_name='Минимальный аптайм', default=0.5)
     points_coefficient = models.FloatField(verbose_name='Коэффициент очков по времени', default=1)
-
-    active = models.BooleanField(default=True)
 
     def __str__(self):
         return f'Забег в {self.raid} {self.begin and self.begin.date().isoformat()}'
@@ -182,8 +180,8 @@ class ConsumableUsage(BaseModel):
 
     consumable = models.ForeignKey('extra_ep.Consumable', verbose_name='Расходник', on_delete=models.CASCADE)
 
-    begin = models.DateTimeField()
-    end = models.DateTimeField()
+    begin = models.DateTimeField(verbose_name='Начало действия')
+    end = models.DateTimeField(verbose_name='Окончание действия')
 
     def __str__(self):
         return f'{self.player} съел {self.consumable} в {self.raid_run.raid}'

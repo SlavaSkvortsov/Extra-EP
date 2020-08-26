@@ -7,9 +7,6 @@
             <li class="nav-item{% if url_name == 'report_list' %} active{% endif %}">
                 <a class="nav-link" href="{% url 'extra_ep:report_list' %}">Отчеты</a>
             </li>
-            <li class="nav-item{% if url_name == 'calendar_month' %} active{% endif %}">
-                <a class="nav-link" href="{% url 'calendar_current_month' %}">Календарь</a>
-            </li>
             <li class="nav-item">
                 <a target="_blank" class="nav-link" href="https://discord.gg/hbyzQyY">
                     <img src="{% static 'extra_ep/discord.png' %}" width="20" height="20"> Дискорд

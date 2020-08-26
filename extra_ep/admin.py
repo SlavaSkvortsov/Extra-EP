@@ -51,6 +51,7 @@ class ClassAdmin(admin.ModelAdmin):
 
 @admin.register(ConsumablesSet)
 class ConsumablesSetAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('consumables', 'groups')
     list_filter = ('klass', 'role')
     search_fields = ('consumables__name', 'groups__name')
 
@@ -77,6 +78,7 @@ class ConsumableAdmin(admin.ModelAdmin):
 
 @admin.register(ConsumableGroup)
 class ConsumableGroupAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('consumables',)
     search_fields = ('name', 'consumables__name')
 
 

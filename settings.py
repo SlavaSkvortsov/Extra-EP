@@ -33,11 +33,8 @@ ALLOWED_HOSTS: List[str] = []
 
 INSTALLED_APPS = [
     'extra_ep',
-    'filer',
-    'mptt',
-    'easy_thumbnails',
-    'calendarium',
     'django_tables2',
+    'django_select2',
     'django_bootstrap_breadcrumbs',
     'bootstrap4',
     'django.contrib.admin',

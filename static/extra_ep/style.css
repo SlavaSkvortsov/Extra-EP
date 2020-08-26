@@ -35,16 +35,6 @@ body {
     background: rgba(39, 43, 48, .85);
 }
 
-#calendar-month tr td.calendarium-current,
-#calendar-week tr td.calendarium-current {
-    background: #3e4449;
-}
-
-#calendar-month tr td,
-#calendar-week tr td {
-    background: #272B30;
-}
-
 .class-druid {
     background-color: #FF7D0A;
 }
