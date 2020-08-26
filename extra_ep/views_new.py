@@ -21,7 +21,7 @@ class ReportDetailTable(tables.Table):
     <a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.classic" >Item</a>
 {% elif record.spell_id %}
     <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.classic" >Spell</a>
-{% elif record.item_name %}
+{% elif record.group_name %}
     {{ record.group_name }}
 {% endif %}
 ''',
