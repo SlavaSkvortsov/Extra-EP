@@ -181,7 +181,7 @@ class ExportReport:
         result = {}
 
         for group in required_set.groups.all():
-            uptime = self._get_group_uptime(group.consumables, player)
+            uptime = self._get_group_uptime(group.consumables.all(), player)
             result[group.id] = uptime
 
         return result
