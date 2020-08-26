@@ -17,6 +17,7 @@ class ReportDetailTable(tables.Table):
     item_link = tables.TemplateColumn(
         verbose_name='Предмет',
         template_code='''
+        {{ record.item_id }}!!{{ record.spell_id }}!!{{ record.item_name }}
 {% if record.item_id %}
     <a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.classic" >Item</a>
 {% elif record.spell_id %}
@@ -62,6 +63,9 @@ class ReportDetailView(tables.SingleTableView):
                 raid_run: RaidRun = RaidRun.objects.get(id=raid_run_id)
 
                 for usage_model in usage_models:
+                    # if usage_model.points == 0:
+                    #     continue
+
                     data = {}
                     if isinstance(usage_model, ConsumableUsageModel):
                         if not usage_model.times_used:
