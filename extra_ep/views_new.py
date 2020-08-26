@@ -62,8 +62,8 @@ class ReportDetailView(tables.SingleTableView):
                 raid_run: RaidRun = RaidRun.objects.get(id=raid_run_id)
 
                 for usage_model in usage_models:
-                    # if usage_model.points == 0:
-                    #     continue
+                    if usage_model.points == 0:
+                        continue
 
                     data = {}
                     if isinstance(usage_model, ConsumableUsageModel):
