@@ -47,12 +47,13 @@ class ExportReport:
         player_ids = ConsumableUsage.objects.filter(
             raid_run__report_id=self.report_id,
         ).order_by().values('player_id').distinct().values_list('player_id', flat=True)
+        players = set()
+        for raid_run in RaidRun.objects.filter(report_id=self.report_id):
+            players.update(raid_run.players.all())
 
         raid_runs = list(RaidRun.objects.filter(report_id=self.report_id))
 
-        for player_id in set(player_ids):
-            player = self._all_players[player_id]
-
+        for player in players:
             if player.role_id is None:
                 self.warnings.add(f'У игрока {player} не указана роль!')
                 continue
@@ -76,7 +77,10 @@ class ExportReport:
             group_uptime = self._get_player_group_uptime(player, required_set)
 
             for raid_run in raid_runs:
-                result[player_id][raid_run.id] = self._raid_run_process(
+                if player not in raid_run.players.all():
+                    continue
+
+                result[player.id][raid_run.id] = self._raid_run_process(
                     raid_run=raid_run,
                     player=player,
                     required_set=required_set,
@@ -110,6 +114,9 @@ class ExportReport:
                 ).first()
                 if limit_obj:
                     amount = min(amount, limit_obj.limit)
+
+                if consumable.is_world_buff:
+                    amount = min(amount, 1)
 
                 points = consumable.points_for_usage * amount
                 result.append(ConsumableUsageModel(

@@ -2,7 +2,7 @@ import csv
 from collections import defaultdict
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Dict, List, TextIO
+from typing import Any, Dict, List, TextIO, Set
 
 from django.utils.functional import cached_property
 
@@ -11,6 +11,8 @@ from extra_ep.models import Boss, Consumable, ConsumableUsage, Player, RaidRun, 
 
 
 class ReportImporter:
+    SERVER_POSTFIX = '-РокДелар'
+
     def __init__(self, report_id: int, log_file: TextIO) -> None:
         self.report_id = report_id
         self.log_file = log_file
@@ -20,6 +22,11 @@ class ReportImporter:
 
         self._player_map: Dict[str, Player] = {}
         self._player_usage_map: Dict[str, List[ConsumableUsage]] = defaultdict(list)
+
+        self._consumable_throttling_map: Dict[Player, Dict[Consumable, List[datetime]]] = (
+            defaultdict(lambda: defaultdict(list))
+        )
+        self._players_in_raid: Set[Player] = set()
 
     def process(self) -> None:
         raid_run = None
@@ -69,12 +76,13 @@ class ReportImporter:
 
                 if boss.raid_end:
                     raid_run.end = time
+                    raid_run.players.add(*self._players_in_raid)
+                    self._players_in_raid = set()
                     raid_run.save()
 
-                    self._finalize_current_run(time)
                     raid_run = None
 
-            elif event in ('SPELL_AURA_APPLIED', 'SPELL_CAST_START'):
+            elif event in ('SPELL_AURA_APPLIED', 'SPELL_CAST_START', 'SPELL_CAST_SUCCESS'):
                 self._make_consumable_usage(row, raid_run, parse_datetime_str(datetime_str))
 
             elif event == 'SPELL_AURA_REMOVED':
@@ -87,7 +95,6 @@ class ReportImporter:
             if raid_run.raid_id is not None:
                 raid_run.end = parse_datetime_str(datetime_str)
                 raid_run.save()
-                self._finalize_current_run(parse_datetime_str(datetime_str))
             else:
                 raid_run.delete()
 
@@ -103,7 +110,20 @@ class ReportImporter:
                 usage.player = player
                 usage.save()
 
-        qs = RaidRun.objects.filter(report_id=self.report_id)
+        qs = RaidRun.objects.filter(report_id=self.report_id).order_by('-begin')
+
+        last_raid = qs.first()
+        last_raid_end = last_raid.end if last_raid else datetime.now()
+
+        for consumables in self._unfinished_consumables.values():
+            for cons_usage in consumables.values():
+                cons_usage.end = last_raid_end
+                try:
+                    cons_usage.save()
+                except ValueError:
+                    cons_usage.raid_run = last_raid
+                    cons_usage.save()
+
         if not qs.exists():
             return
 
@@ -114,27 +134,30 @@ class ReportImporter:
 
         report.save()
 
-    def _finalize_current_run(self, time: datetime):
-        for consumables in self._unfinished_consumables.values():
-            for cons_usage in consumables.values():
-                cons_usage.end = time
-                cons_usage.save()
-
-        self._unfinished_consumables = defaultdict(dict)
-
     def _create_unknown_raid_run(self) -> RaidRun:
         return RaidRun.objects.create(
             report_id=self.report_id,
         )
 
     def _make_consumable_usage(self, row: List[Any], raid_run: RaidRun, time: datetime) -> None:
+        player_name = row[2]
+        if not player_name.endswith(self.SERVER_POSTFIX):
+            return
+
+        player = self._get_or_create_player(row[2])
+        self._players_in_raid.add(player)
         consumable = self._all_consumables.get(int(row[9]))
 
         if consumable is None:
             return
 
-        player = self._get_or_create_player(row[2])
         self._player_map[row[1]] = player
+
+        aprox_usage_time = time.replace(microsecond=0)
+        if aprox_usage_time in self._consumable_throttling_map[player][consumable]:
+            return
+
+        self._consumable_throttling_map[player][consumable].append(aprox_usage_time)
 
         existing_unfinished_usage = self._unfinished_consumables[player.id].get(consumable.id)
         if existing_unfinished_usage is not None:
@@ -160,7 +183,7 @@ class ReportImporter:
 
             consumable = self._all_consumables.get(aura_id)
 
-            if consumable is None:
+            if consumable is None or not consumable.is_world_buff:
                 continue
 
             self._player_usage_map[row[1]].append(ConsumableUsage(

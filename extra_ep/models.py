@@ -110,6 +110,7 @@ class Consumable(BaseModel):
     points_for_usage = models.IntegerField(verbose_name='Очки за одно использование', blank=False, null=False)
     points_over_raid = models.IntegerField(verbose_name='Очки за рейд', blank=True, null=True)
     required = models.BooleanField(verbose_name='Требуется (влияет только на очки за время)', blank=True, default=True)
+    is_world_buff = models.BooleanField(verbose_name='Мировой баф', blank=True, default=False)
 
     def __str__(self):
         return self.name or 'Укажи, бля, имя, а то хуйня какая-то'
@@ -161,6 +162,8 @@ class RaidRun(BaseModel):
     required_uptime = models.FloatField(verbose_name='Необходимый аптайм', default=0.85)
     minimum_uptime = models.FloatField(verbose_name='Минимальный аптайм', default=0.5)
     points_coefficient = models.FloatField(verbose_name='Коэффициент очков по времени', default=1)
+
+    players = models.ManyToManyField('extra_ep.Player', verbose_name='Игроки')
 
     def __str__(self):
         return f'Забег в {self.raid} {self.begin and self.begin.date().isoformat()}'

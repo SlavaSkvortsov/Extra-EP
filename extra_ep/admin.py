@@ -65,7 +65,7 @@ class ConsumableAdmin(admin.ModelAdmin):
     inlines = [
         LimitInline,
     ]
-    search_fields = ('spell_id', 'spell_name', 'name', 'points_for_usage')
+    search_fields = ('spell_id', 'item_id', 'name', 'points_for_usage')
     list_filter = ('usage_based_item',)
     list_display = (
         'name',
@@ -84,7 +84,7 @@ class ConsumableGroupAdmin(admin.ModelAdmin):
 
 @admin.register(RaidRun)
 class RaidRunAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ('players', )
 
 
 @admin.register(ConsumableUsage)
