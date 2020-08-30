@@ -19,6 +19,9 @@ class ReportDetailTable(tables.Table):
 {% elif record.spell_id %}
     <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.classic" >Spell</a>
 {% elif record.group_name %}
+    {% if record.image_url %}
+        <img src="{{ record.image_url }}" width="16" height="16">
+    {% endif %}
     {{ record.group_name }}
 {% endif %}
 ''',
@@ -74,6 +77,9 @@ class ReportDetailView(tables.SingleTableView):
                     if isinstance(usage_model, UptimeConsumableUsageModel):
                         data['uptime'] = round(usage_model.coefficient * 100, 2)
 
+                    consumable_group = ConsumableGroup.objects.filter(id=usage_model.group_id).first()
+                    image_url = consumable_group.image_url if consumable_group else None
+
                     result.append({
                         'player': player,
                         'raid': raid_run.raid,
@@ -86,9 +92,8 @@ class ReportDetailView(tables.SingleTableView):
                             Consumable.objects.get(id=usage_model.consumable_id).spell_id
                             if usage_model.consumable_id else None
                         ),
-                        'group_name': (
-                            ConsumableGroup.objects.get(id=usage_model.group_id) if usage_model.group_id else None
-                        ),
+                        'group_name': consumable_group,
+                        'image_url': image_url,
                         **data,
                     })
 

@@ -144,6 +144,7 @@ class ConsumableGroup(BaseModel):
     points = models.IntegerField(verbose_name='Очки')
     consumables = models.ManyToManyField('extra_ep.Consumable', verbose_name='Расходники')
     required = models.BooleanField(verbose_name='Требуется', blank=True, default=True)
+    image_url = models.URLField(verbose_name='URL изображения', blank=True, null=True)
 
     def __str__(self):
         return self.name
