@@ -10,7 +10,14 @@ from extra_ep.models import Consumable, ConsumableGroup, Player, RaidRun, Report
 
 class ReportDetailTable(tables.Table):
     raid = tables.Column(verbose_name='Рейд')
-    player = tables.Column(verbose_name='Игрок')
+    player = tables.TemplateColumn(
+        verbose_name='Игрок',
+        template_code='''
+<font {% if record.player.klass.color %}color="{{ record.player.klass.color }}"{% endif %}>
+    {{ record.player }}
+</font>
+'''
+    )
     item_link = tables.TemplateColumn(
         verbose_name='Предмет',
         template_code='''
@@ -19,10 +26,23 @@ class ReportDetailTable(tables.Table):
 {% elif record.spell_id %}
     <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.classic" >Spell</a>
 {% elif record.group_name %}
-    {% if record.image_url %}
-        <img src="{{ record.image_url }}" width="16" height="16">
-    {% endif %}
-    {{ record.group_name }}
+    <div class="consumable_group">
+        {% if record.image_url %}
+            <img src="{{ record.image_url }}" width="16" height="16">
+        {% endif %}
+        {{ record.group_name }}
+        <span class="tooltiptext">
+            {% for consumable in record.group_consumables %}
+                <div>
+                    {% if consumable.item_id %}
+                        <a href="#" data-wowhead="item={{ consumable.item_id }}&domain=ru.classic" >Item</a>
+                    {% else %}
+                        <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </span>
+    </div>
 {% endif %}
 ''',
         accessor='item_id',
@@ -77,7 +97,7 @@ class ReportDetailView(tables.SingleTableView):
                     if isinstance(usage_model, UptimeConsumableUsageModel):
                         data['uptime'] = round(usage_model.coefficient * 100, 2)
 
-                    consumable_group = ConsumableGroup.objects.filter(id=usage_model.group_id).first()
+                    consumable_group: ConsumableGroup = ConsumableGroup.objects.filter(id=usage_model.group_id).first()
                     image_url = consumable_group.image_url if consumable_group else None
 
                     result.append({
@@ -94,6 +114,7 @@ class ReportDetailView(tables.SingleTableView):
                         ),
                         'group_name': consumable_group,
                         'image_url': image_url,
+                        'group_consumables': consumable_group.consumables.all() if consumable_group else None,
                         **data,
                     })
 

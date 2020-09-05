@@ -52,6 +52,8 @@ class ReportImporter:
                     raid_run.required_uptime = boss.raid.default_required_uptime
                     raid_run.minimum_uptime = boss.raid.default_minimum_uptime
                     raid_run.points_coefficient = boss.raid.default_points_coefficient
+                    raid_run.is_hard_mode = boss.raid.default_is_hard_mode
+                    raid_run.begin = parse_datetime_str(datetime_str)
                     raid_run.save()
 
                 if raid_run.raid_id != boss.raid_id:
@@ -60,11 +62,6 @@ class ReportImporter:
 
                     raid_run = self._create_unknown_raid_run()
                     raid_run.raid_id = boss.raid_id
-                    raid_run.save()
-
-            elif event == 'UNIT_DIED':
-                if raid_run.begin is None:
-                    raid_run.begin = parse_datetime_str(datetime_str)
                     raid_run.save()
 
             elif event == 'ENCOUNTER_END':

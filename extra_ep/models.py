@@ -1,4 +1,6 @@
 from datetime import timedelta
+from functools import cached_property
+from typing import Set
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -33,6 +35,7 @@ class Raid(BaseModel):
     default_required_uptime = models.FloatField(verbose_name='Необходимый аптайм по умолчанию', default=0.85)
     default_minimum_uptime = models.FloatField(verbose_name='Минимальный аптайм по умолчанию', default=0.5)
     default_points_coefficient = models.FloatField(verbose_name='Коэффициент очков по времени по умолчанию', default=1)
+    default_is_hard_mode = models.BooleanField(verbose_name='Режим освоения, очки за использование', default=False)
 
     def __str__(self):
         return self.name
@@ -86,6 +89,14 @@ class ConsumablesSet(BaseModel):
 
     consumables = models.ManyToManyField('extra_ep.Consumable', blank=True, verbose_name='Расходники')
     groups = models.ManyToManyField('extra_ep.ConsumableGroup', blank=True, verbose_name='Группы расходников')
+
+    @cached_property
+    def all_consumables(self) -> Set['Consumable']:
+        return set(self.consumables.all())
+
+    @cached_property
+    def all_groups(self) -> Set['ConsumableGroup']:
+        return set(self.groups.all())
 
     class Meta:
         unique_together = ('role', 'klass')
@@ -146,6 +157,10 @@ class ConsumableGroup(BaseModel):
     required = models.BooleanField(verbose_name='Требуется', blank=True, default=True)
     image_url = models.URLField(verbose_name='URL изображения', blank=True, null=True)
 
+    @cached_property
+    def all_consumables(self) -> Set[Consumable]:
+        return set(self.consumables.all())
+
     def __str__(self):
         return self.name
 
@@ -163,6 +178,8 @@ class RaidRun(BaseModel):
     required_uptime = models.FloatField(verbose_name='Необходимый аптайм', default=0.85)
     minimum_uptime = models.FloatField(verbose_name='Минимальный аптайм', default=0.5)
     points_coefficient = models.FloatField(verbose_name='Коэффициент очков по времени', default=1)
+
+    is_hard_mode = models.BooleanField(verbose_name='Режим освоения, очки за использование', default=False)
 
     players = models.ManyToManyField('extra_ep.Player', verbose_name='Игроки')
 
@@ -206,7 +223,6 @@ class Report(BaseModel):
     raid_day = models.DateField(verbose_name='День рейда', null=True)
     raid_name = models.CharField(verbose_name='Рейд', max_length=200, null=True)
     flushed = models.BooleanField(verbose_name='Очки начислены', default=False)
-    is_hard_mode = models.BooleanField(verbose_name='Режим освоения, очки за использование', default=False)
 
     class Meta:
         verbose_name = 'Отчет'

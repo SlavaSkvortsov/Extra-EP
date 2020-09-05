@@ -5,6 +5,7 @@ from datetime import timedelta
 from functools import reduce
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
+from django.db.models import Count
 from django.utils.functional import cached_property
 
 from extra_ep.models import Consumable, ConsumableUsage, ConsumableUsageLimit, ConsumablesSet, Player, RaidRun
@@ -44,14 +45,13 @@ class ExportReport:
     def process(self) -> Dict[int, Dict[int, List[BaseConsumableUsageModel]]]:
         result: Dict[int, Dict[int, List[BaseConsumableUsageModel]]] = defaultdict(dict)
 
-        player_ids = ConsumableUsage.objects.filter(
-            raid_run__report_id=self.report_id,
-        ).order_by().values('player_id').distinct().values_list('player_id', flat=True)
         players = set()
-        for raid_run in RaidRun.objects.filter(report_id=self.report_id):
-            players.update(raid_run.players.all())
-
+        players_by_raid_run = {}
         raid_runs = list(RaidRun.objects.filter(report_id=self.report_id))
+        for raid_run in raid_runs:
+            raid_run_players = set(raid_run.players.all())
+            players_by_raid_run[raid_run.id] = {player.id for player in raid_run_players}
+            players.update(raid_run_players)
 
         for player in players:
             if player.role_id is None:
@@ -62,12 +62,8 @@ class ExportReport:
                 self.warnings.add(f'У игрока {player} не указан класс!')
                 continue
 
-            try:
-                required_set = ConsumablesSet.objects.get(
-                    klass_id=player.klass_id,
-                    role_id=player.role_id,
-                )
-            except ConsumablesSet.DoesNotExist:
+            required_set = self._consumable_sets.get(player.klass_id, {}).get(player.role_id)
+            if required_set is None:
                 self.warnings.add(
                     f'Для класса {player.klass} и роли {player.role} не найден набор необходимых расходников',
                 )
@@ -77,7 +73,7 @@ class ExportReport:
             group_uptime = self._get_player_group_uptime(player, required_set)
 
             for raid_run in raid_runs:
-                if player not in raid_run.players.all():
+                if player.id not in players_by_raid_run[raid_run.id]:
                     continue
 
                 result[player.id][raid_run.id] = self._raid_run_process(
@@ -87,6 +83,40 @@ class ExportReport:
                     consumable_uptime=consumable_uptime,
                     group_uptime=group_uptime,
                 )
+
+        return result
+
+    @cached_property
+    def _consumable_sets(self) -> Dict[int, Dict[int, ConsumablesSet]]:
+        result = defaultdict(dict)
+        for consumable_set in ConsumablesSet.objects.all():
+            result[consumable_set.klass_id][consumable_set.role_id] = consumable_set
+
+        return result
+
+    @cached_property
+    def _consumable_usage_amount(self) -> Dict[int, Dict[int, Dict[int, int]]]:
+        """
+        raid_run_id: player_id: consumable_id -> count
+        """
+        result = defaultdict(lambda: defaultdict(dict))
+        query = ConsumableUsage.objects.filter(
+            raid_run__report_id=self.report_id,
+        ).values(
+            'raid_run_id', 'player_id', 'consumable_id',
+        ).annotate(
+            count=Count('id'),
+        )
+        for row in query:
+            result[row['raid_run_id']][row['player_id']][row['consumable_id']] = row['count']
+
+        return result
+
+    @cached_property
+    def _limits(self) -> Dict[int, Dict[int, int]]:
+        result = defaultdict(dict)
+        for limit in ConsumableUsageLimit.objects.all():
+            result[limit.raid_id][limit.consumable_id] = limit.limit
 
         return result
 
@@ -100,20 +130,17 @@ class ExportReport:
     ) -> List[BaseConsumableUsageModel]:
         result: List[BaseConsumableUsageModel] = []
 
-        for consumable in required_set.consumables.all():
-            if consumable.usage_based_item or raid_run.report.is_hard_mode:
-                amount = ConsumableUsage.objects.filter(
-                    raid_run=raid_run,
-                    player=player,
-                    consumable=consumable,
-                ).count()
+        for consumable in required_set.all_consumables:
+            if consumable.usage_based_item or raid_run.is_hard_mode:
+                amount = self._consumable_usage_amount.get(
+                    raid_run.id, {},
+                ).get(
+                    player.id, {},
+                ).get(consumable.id, 0)
 
-                limit_obj: ConsumableUsageLimit = ConsumableUsageLimit.objects.filter(
-                    raid=raid_run.raid,
-                    consumable=consumable,
-                ).first()
-                if limit_obj:
-                    amount = min(amount, limit_obj.limit)
+                limit = self._limits.get(raid_run.raid_id, {}).get(consumable.id)
+                if limit is not None:
+                    amount = min(amount, limit)
 
                 if consumable.is_world_buff:
                     amount = min(amount, 1)
@@ -143,7 +170,7 @@ class ExportReport:
                     coefficient=coeff,
                 ))
 
-        for group in required_set.groups.all():
+        for group in required_set.all_groups:
             uptime = group_uptime[group.id]
             raid_uptime = self._get_raid_uptime(uptime, raid_run)
 
@@ -171,7 +198,7 @@ class ExportReport:
     ) -> Dict[int, List[Period]]:
         result = {}
 
-        for consumable in required_set.consumables.all():
+        for consumable in required_set.all_consumables:
             if consumable.usage_based_item:
                 continue
 
@@ -187,8 +214,8 @@ class ExportReport:
     ) -> Dict[int, List[Period]]:
         result = {}
 
-        for group in required_set.groups.all():
-            uptime = self._get_group_uptime(group.consumables.all(), player)
+        for group in required_set.all_groups:
+            uptime = self._get_group_uptime(group.all_consumables, player)
             result[group.id] = uptime
 
         return result
