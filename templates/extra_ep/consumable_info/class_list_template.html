@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load django_tables2 %}
+{% load static %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block content %}
+    {% block breadcrumbs %}
+        {% breadcrumb 'Классы' '' %}
+    {% endblock %}
+    {% render_breadcrumbs %}
+    {% for class in object_list %}
+        <a href="{% url 'extra_ep:class_roles' class_id=class.id %}">
+            <font {% if class.color %}color="{{ class.color }}"{% endif %}>
+                <h1>
+                    {{ class.name }}
+                </h1>
+            </font>
+        </a>
+    {% endfor %}
+{% endblock %}

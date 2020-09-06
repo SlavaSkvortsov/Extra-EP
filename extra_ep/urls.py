@@ -16,5 +16,14 @@ urlpatterns = [
 
     path(r'report/create/', views.CreateReportView.as_view(), name='report_create'),
     path(r'reports/', views.ReportListView.as_view(), name='report_list'),
+
+    path(
+        'consumable_info/<int:class_id>/<int:role_id>/',
+        views_new.ConsumableSetDetailView.as_view(),
+        name='class_role_consumables',
+    ),
+    path('consumable_info/<int:class_id>/', views_new.ClassRoleListView.as_view(), name='class_roles'),
+    path('consumable_info/', views_new.ClassListView.as_view(), name='classes'),
+
     path('', views.MainRedirectView.as_view()),
 ]

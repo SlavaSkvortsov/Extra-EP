@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load django_tables2 %}
+{% load static %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block content %}
+    {% block breadcrumbs %}
+        {% breadcrumb 'Классы' 'extra_ep:classes' %}
+        {% breadcrumb class.name '' %}
+    {% endblock %}
+    {% render_breadcrumbs %}
+    {% for role in object_list %}
+        <a href="{% url 'extra_ep:class_role_consumables' class_id=class.id role_id=role.id %}">
+            <h1>
+                {{ role.name }}
+            </h1>
+        </a>
+    {% endfor %}
+{% endblock %}

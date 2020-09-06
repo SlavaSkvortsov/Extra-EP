@@ -2,10 +2,10 @@ from typing import Any, Dict
 
 import django_tables2 as tables
 from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from core.export_report_new import ConsumableUsageModel, ExportReport, UptimeConsumableUsageModel
-from extra_ep.models import Consumable, ConsumableGroup, Player, RaidRun, Report
+from extra_ep.models import Class, Consumable, ConsumableGroup, ConsumablesSet, Player, RaidRun, Report, Role
 
 
 class ReportDetailTable(tables.Table):
@@ -150,3 +150,50 @@ class ExportReportView(DetailView):
             rows.append(f'{player.name},{points}')
 
         return '\n'.join(sorted(rows))
+
+
+class ClassListView(ListView):
+    model = Class
+    template_name = 'extra_ep/consumable_info/class_list_template.html'
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('name')
+
+
+class ClassRoleListView(ListView):
+    model = Role
+    template_name = 'extra_ep/consumable_info/role_list_template.html'
+
+    def get_queryset(self):
+        role_ids_qs = ConsumablesSet.objects.filter(
+            klass_id=self.kwargs['class_id'],
+        ).values(
+            'role_id',
+        ).order_by().distinct()
+
+        return Role.objects.filter(id__in=role_ids_qs)
+
+    def get_context_data(self, *args, **kwargs):
+        result = super().get_context_data(*args, **kwargs)
+        result['class'] = Class.objects.get(id=self.kwargs['class_id'])
+
+        return result
+
+
+class ConsumableSetDetailView(DetailView):
+    template_name = 'extra_ep/consumable_info/consumable_set_detail_template.html'
+    model = ConsumablesSet
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(self.model, klass_id=self.kwargs['class_id'], role_id=self.kwargs['role_id'])
+
+    def get_context_data(self, **kwargs):
+        result = super().get_context_data(**kwargs)
+        result['class'] = Class.objects.get(id=self.kwargs['class_id'])
+        result['role'] = Role.objects.get(id=self.kwargs['role_id'])
+        result['consumables'] = self.object.consumables.filter(
+            is_world_buff=False,
+        ).order_by('usage_based_item', '-required', 'name')
+        result['groups'] = self.object.groups.order_by('-required').prefetch_related('consumables')
+
+        return result

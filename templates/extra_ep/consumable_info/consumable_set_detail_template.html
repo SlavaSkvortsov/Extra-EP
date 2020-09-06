@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load django_tables2 %}
+{% load static %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block head %}
+    {{ block.super }}
+    <script>var whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true};</script>
+    <script src="https://wow.zamimg.com/widgets/power.js"></script>
+{% endblock %}
+
+{% block content %}
+    {% block breadcrumbs %}
+        {% breadcrumb 'Классы' 'extra_ep:classes' %}
+        {% breadcrumb class.name 'extra_ep:class_roles' class_id=class.id %}
+        {% breadcrumb role.name '' %}
+    {% endblock %}
+    {% render_breadcrumbs %}
+    <h1>Химия</h1><br/>
+    {% for consumable in consumables %}
+        <div class="row">
+            <div class="col-4">
+                {% if consumable.item_id %}
+                    <a href="#" data-wowhead="item={{ consumable.item_id }}&domain=ru.classic" >Item</a>
+                {% else %}
+                    <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
+                {% endif %}
+            </div>
+            <div class="col-4">
+                {% if consumable.usage_based_item %}
+                    За 1 использование <b>{{ consumable.points_for_usage }}</b> очков
+                {% else %}
+                    За рейд при полном аптайме <b>{{ consumable.points_over_raid }}</b> очков
+                {% endif %}
+            </div>
+            <div class="col-4">
+                {% if consumable.required and not consumable.usage_based_item %}
+                    <span class="false">Обязательно</span>
+                {% else %}
+                    <span>Не обязательно</span>
+                {% endif %}
+            </div>
+        </div>
+        <hr/>
+    {% endfor %}
+
+    {% for group in groups %}
+        <div class="row">
+            <div class="col-4">
+                {% for consumable in group.consumables.all %}
+                    <div>
+                        {% if consumable.item_id %}
+                            <a href="#" data-wowhead="item={{ consumable.item_id }}&domain=ru.classic" >Item</a>
+                        {% else %}
+                            <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-4">
+                За рейд при полном аптайме <b>{{ group.points }}</b> очков
+            </div>
+            <div class="col-4">
+                {% if group.required %}
+                    <span class="false">Обязательно</span>
+                {% else %}
+                    <span>Не обязательно</span>
+                {% endif %}
+            </div>
+        </div>
+        <hr/>
+    {% endfor %}
+
+    {% if world_buffs %}
+        <h1>Мировые бафы</h1><br/>
+    {% endif %}
+    {% for wb in world_buffs %}
+        <div class="row">
+            <div class="col-4">
+                <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
+            </div>
+            <div class="col-4">
+                За приход в рейд <b>{{ consumable.points_for_usage }}</b> очков
+            </div>
+            <div class="col-4">
+                <span>Не обязательно</span>
+            </div>
+        </div>
+        <hr/>
+    {% endfor %}
+{% endblock %}
