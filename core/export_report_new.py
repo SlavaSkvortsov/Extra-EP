@@ -47,7 +47,7 @@ class ExportReport:
 
         players = set()
         players_by_raid_run = {}
-        raid_runs = list(RaidRun.objects.filter(report_id=self.report_id))
+        raid_runs = list(RaidRun.objects.prefetch_related('players').filter(report_id=self.report_id))
         for raid_run in raid_runs:
             raid_run_players = set(raid_run.players.all())
             players_by_raid_run[raid_run.id] = {player.id for player in raid_run_players}
@@ -89,7 +89,8 @@ class ExportReport:
     @cached_property
     def _consumable_sets(self) -> Dict[int, Dict[int, ConsumablesSet]]:
         result = defaultdict(dict)
-        for consumable_set in ConsumablesSet.objects.all():
+        qs = ConsumablesSet.objects.prefetch_related('consumables', 'groups', 'groups__consumables').all()
+        for consumable_set in qs:
             result[consumable_set.klass_id][consumable_set.role_id] = consumable_set
 
         return result
@@ -113,6 +114,18 @@ class ExportReport:
         return result
 
     @cached_property
+    def _consumable_usage_cache(self) -> Dict[int, Dict[int, List[ConsumableUsage]]]:
+        result = defaultdict(lambda: defaultdict(list))
+
+        qs = ConsumableUsage.objects.filter(
+            raid_run__report_id=self.report_id,
+        )
+        for usage in qs:
+            result[usage.player_id][usage.consumable_id].append(usage)
+
+        return result
+
+    @cached_property
     def _limits(self) -> Dict[int, Dict[int, int]]:
         result = defaultdict(dict)
         for limit in ConsumableUsageLimit.objects.all():
@@ -130,7 +143,7 @@ class ExportReport:
     ) -> List[BaseConsumableUsageModel]:
         result: List[BaseConsumableUsageModel] = []
 
-        for consumable in required_set.all_consumables:
+        for consumable in required_set.consumables.all():
             if consumable.usage_based_item or raid_run.is_hard_mode:
                 amount = self._consumable_usage_amount.get(
                     raid_run.id, {},
@@ -170,7 +183,7 @@ class ExportReport:
                     coefficient=coeff,
                 ))
 
-        for group in required_set.all_groups:
+        for group in required_set.groups.all():
             uptime = group_uptime[group.id]
             raid_uptime = self._get_raid_uptime(uptime, raid_run)
 
@@ -198,7 +211,7 @@ class ExportReport:
     ) -> Dict[int, List[Period]]:
         result = {}
 
-        for consumable in required_set.all_consumables:
+        for consumable in required_set.consumables.all():
             if consumable.usage_based_item:
                 continue
 
@@ -214,8 +227,8 @@ class ExportReport:
     ) -> Dict[int, List[Period]]:
         result = {}
 
-        for group in required_set.all_groups:
-            uptime = self._get_group_uptime(group.all_consumables, player)
+        for group in required_set.groups.all():
+            uptime = self._get_group_uptime(group.consumables.all(), player)
             result[group.id] = uptime
 
         return result
@@ -265,14 +278,9 @@ class ExportReport:
         return int(round(coefficient * a + b)), coefficient
 
     def _get_consumable_uptime(self, consumable: Consumable, player: Player) -> List[Period]:
-        qs = ConsumableUsage.objects.filter(
-            raid_run__report_id=self.report_id,
-            consumable=consumable,
-            player=player,
-        )
-
         uptime_list = []
-        for usage in qs:
+        consumable_usages = self._consumable_usage_cache[player.id][consumable.id]
+        for usage in consumable_usages:
             # To prevent overlapping uptimes
             self._insert_into_uptime_list(Period(usage.begin, usage.end), uptime_list)
         return uptime_list
@@ -284,13 +292,8 @@ class ExportReport:
     def _get_group_uptime(self, consumables: Iterable[Consumable], player: Player) -> List[Period]:
         uptime: List[Period] = []
         for consumable in consumables:
-            qs = ConsumableUsage.objects.filter(
-                raid_run__report_id=self.report_id,
-                consumable=consumable,
-                player=player,
-            )
-
-            for usage in qs:
+            usages = self._consumable_usage_cache[player.id][consumable.id]
+            for usage in usages:
                 self._insert_into_uptime_list(Period(usage.begin, usage.end), uptime)
 
         return uptime

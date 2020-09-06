@@ -26,11 +26,9 @@ class ReportDetailTable(tables.Table):
 {% elif record.spell_id %}
     <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.classic" >Spell</a>
 {% elif record.group_name %}
-    <div class="consumable_group">
-        {% if record.image_url %}
-            <img src="{{ record.image_url }}" width="16" height="16">
-        {% endif %}
+    {% if not record.group_consumables %}
         {{ record.group_name }}
+    {% else %}
         <span class="tooltiptext">
             {% for consumable in record.group_consumables %}
                 <div>
@@ -42,7 +40,7 @@ class ReportDetailTable(tables.Table):
                 </div>
             {% endfor %}
         </span>
-    </div>
+    {% endif %}
 {% endif %}
 ''',
         accessor='item_id',
@@ -73,16 +71,26 @@ class ReportDetailView(tables.SingleTableView):
         return context
 
     def get_table_data(self):
-        exporter = ExportReport(self.kwargs['report_id'])
+        report_id = self.kwargs['report_id']
+        exporter = ExportReport(report_id)
         data = exporter.process()
         self.warnings = exporter.warnings
 
         result = []
+
+        consumables = {consumable.id: consumable for consumable in Consumable.objects.all()}
+        group_qs = ConsumableGroup.objects.prefetch_related('consumables').all()
+        consumable_groups = {group.id: group for group in group_qs}
+
+        raid_runs_qs = RaidRun.objects.select_related('raid').filter(report_id=report_id)
+        raid_runs = {raid_run.id: raid_run for raid_run in raid_runs_qs}
+        players = {player.id: player for player in Player.objects.filter(id__in=data.keys())}
+
         for player_id, raid_run_data in data.items():
-            player: Player = Player.objects.get(id=player_id)
+            player = players[player_id]
 
             for raid_run_id, usage_models in raid_run_data.items():
-                raid_run: RaidRun = RaidRun.objects.get(id=raid_run_id)
+                raid_run = raid_runs[raid_run_id]
 
                 for usage_model in usage_models:
                     if usage_model.points == 0:
@@ -97,28 +105,21 @@ class ReportDetailView(tables.SingleTableView):
                     if isinstance(usage_model, UptimeConsumableUsageModel):
                         data['uptime'] = round(usage_model.coefficient * 100, 2)
 
-                    consumable_group: ConsumableGroup = ConsumableGroup.objects.filter(id=usage_model.group_id).first()
-                    image_url = consumable_group.image_url if consumable_group else None
+                    consumable_group = consumable_groups.get(usage_model.group_id)
+                    consumable = consumables.get(usage_model.consumable_id)
 
                     result.append({
-                        'player': player,
-                        'raid': raid_run.raid,
+                        'player': player.name,
+                        'raid': raid_run.raid.name,
                         'points': usage_model.points,
-                        'item_id': (
-                            Consumable.objects.get(id=usage_model.consumable_id).item_id
-                            if usage_model.consumable_id else None
-                        ),
-                        'spell_id': (
-                            Consumable.objects.get(id=usage_model.consumable_id).spell_id
-                            if usage_model.consumable_id else None
-                        ),
-                        'group_name': consumable_group,
-                        'image_url': image_url,
+                        'item_id': consumable.item_id if consumable else None,
+                        'spell_id': consumable.spell_id if consumable else None,
+                        'group_name': consumable_group.name if consumable_group else None,
                         'group_consumables': consumable_group.consumables.all() if consumable_group else None,
                         **data,
                     })
 
-        return sorted(result, key=lambda row: row['player'].name)
+        return sorted(result, key=lambda row: row['player'])
 
 
 class ExportReportView(DetailView):

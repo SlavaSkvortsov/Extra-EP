@@ -90,14 +90,6 @@ class ConsumablesSet(BaseModel):
     consumables = models.ManyToManyField('extra_ep.Consumable', blank=True, verbose_name='Расходники')
     groups = models.ManyToManyField('extra_ep.ConsumableGroup', blank=True, verbose_name='Группы расходников')
 
-    @cached_property
-    def all_consumables(self) -> Set['Consumable']:
-        return set(self.consumables.all())
-
-    @cached_property
-    def all_groups(self) -> Set['ConsumableGroup']:
-        return set(self.groups.all())
-
     class Meta:
         unique_together = ('role', 'klass')
         verbose_name = 'Набор расходников'
@@ -155,11 +147,6 @@ class ConsumableGroup(BaseModel):
     points = models.IntegerField(verbose_name='Очки')
     consumables = models.ManyToManyField('extra_ep.Consumable', verbose_name='Расходники')
     required = models.BooleanField(verbose_name='Требуется', blank=True, default=True)
-    image_url = models.URLField(verbose_name='URL изображения', blank=True, null=True)
-
-    @cached_property
-    def all_consumables(self) -> Set[Consumable]:
-        return set(self.consumables.all())
 
     def __str__(self):
         return self.name
