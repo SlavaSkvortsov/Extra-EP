@@ -19,26 +19,33 @@
     <h1>Химия</h1><br/>
     {% for consumable in consumables %}
         <div class="row">
-            <div class="col-4">
+            <div class="col-3">
                 {% if consumable.item_id %}
                     <a href="#" data-wowhead="item={{ consumable.item_id }}&domain=ru.classic" >Item</a>
                 {% else %}
                     <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
                 {% endif %}
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 {% if consumable.usage_based_item %}
                     За 1 использование <b>{{ consumable.points_for_usage }}</b> очков
                 {% else %}
                     За рейд при полном аптайме <b>{{ consumable.points_over_raid }}</b> очков
                 {% endif %}
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 {% if consumable.required and not consumable.usage_based_item %}
                     <span class="false">Обязательно</span>
                 {% else %}
                     <span>Не обязательно</span>
                 {% endif %}
+            </div>
+            <div class="col-3">
+                {% for limit in consumable.limits.all %}
+                    <div>
+                        {{ limit.raid.name }} - {{ limit.limit }} шт
+                    </div>
+                {% endfor %}
             </div>
         </div>
         <hr/>
@@ -46,7 +53,7 @@
 
     {% for group in groups %}
         <div class="row">
-            <div class="col-4">
+            <div class="col-3">
                 {% for consumable in group.consumables.all %}
                     <div>
                         {% if consumable.item_id %}
@@ -57,10 +64,10 @@
                     </div>
                 {% endfor %}
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 За рейд при полном аптайме <b>{{ group.points }}</b> очков
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 {% if group.required %}
                     <span class="false">Обязательно</span>
                 {% else %}
@@ -76,13 +83,13 @@
     {% endif %}
     {% for wb in world_buffs %}
         <div class="row">
-            <div class="col-4">
+            <div class="col-3">
                 <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 За приход в рейд <b>{{ consumable.points_for_usage }}</b> очков
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 <span>Не обязательно</span>
             </div>
         </div>

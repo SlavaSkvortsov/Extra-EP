@@ -132,7 +132,12 @@ class Consumable(BaseModel):
 
 
 class ConsumableUsageLimit(BaseModel):
-    consumable = models.ForeignKey('extra_ep.Consumable', verbose_name='Расходник', on_delete=models.CASCADE)
+    consumable = models.ForeignKey(
+        'extra_ep.Consumable',
+        verbose_name='Расходник',
+        on_delete=models.CASCADE,
+        related_name='limits',
+    )
     raid = models.ForeignKey('extra_ep.Raid', verbose_name='Рейд', on_delete=models.CASCADE)
 
     limit = models.IntegerField(verbose_name='Сколько за рейд можно съесть')

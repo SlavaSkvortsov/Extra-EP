@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
 import django_tables2 as tables
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 
 from core.export_report_new import ConsumableUsageModel, ExportReport, UptimeConsumableUsageModel
@@ -178,6 +178,18 @@ class ClassRoleListView(ListView):
         result['class'] = Class.objects.get(id=self.kwargs['class_id'])
 
         return result
+
+    def get(self, *args, **kwargs):
+        qs = self.get_queryset()
+        if qs.count() == 1:
+            role = qs.first()
+            return redirect(
+                'extra_ep:class_role_consumables',
+                class_id=self.kwargs['class_id'],
+                role_id=role.id,
+            )
+
+        return super().get(*args, **kwargs)
 
 
 class ConsumableSetDetailView(DetailView):
