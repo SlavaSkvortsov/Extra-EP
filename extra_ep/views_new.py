@@ -13,7 +13,7 @@ class ReportDetailTable(tables.Table):
     player = tables.TemplateColumn(
         verbose_name='Игрок',
         template_code='''
-<font {% if record.player.klass.color %}color="{{ record.player.klass.color }}"{% endif %}>
+<font {% if record.color %}color="{{ record.color }}"{% endif %}>
     {{ record.player }}
 </font>
 '''
@@ -84,7 +84,8 @@ class ReportDetailView(tables.SingleTableView):
 
         raid_runs_qs = RaidRun.objects.select_related('raid').filter(report_id=report_id)
         raid_runs = {raid_run.id: raid_run for raid_run in raid_runs_qs}
-        players = {player.id: player for player in Player.objects.filter(id__in=data.keys())}
+        players_qs = Player.objects.select_related('klass').filter(id__in=data.keys())
+        players = {player.id: player for player in players_qs}
 
         for player_id, raid_run_data in data.items():
             player = players[player_id]
@@ -110,6 +111,7 @@ class ReportDetailView(tables.SingleTableView):
 
                     result.append({
                         'player': player.name,
+                        'color': player.klass.color if player.klass else None,
                         'raid': raid_run.raid.name,
                         'points': usage_model.points,
                         'item_id': consumable.item_id if consumable else None,
