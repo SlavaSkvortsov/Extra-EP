@@ -27,6 +27,7 @@ class ReportImporter:
             defaultdict(lambda: defaultdict(list))
         )
         self._players_in_raid: Set[Player] = set()
+        self._track_players = False
 
     def process(self) -> None:
         raid_run = None
@@ -39,6 +40,7 @@ class ReportImporter:
             datetime_str, event = row[0].split('  ')
 
             if event == 'ENCOUNTER_START':
+                self._track_players = True
                 if raid_run.begin is None:
                     raid_run.begin = parse_datetime_str(datetime_str)
                     raid_run.save()
@@ -72,6 +74,7 @@ class ReportImporter:
                 time = parse_datetime_str(datetime_str)
 
                 if boss.raid_end:
+                    self._track_players = False
                     raid_run.end = time
                     raid_run.players.add(*self._players_in_raid)
                     self._players_in_raid = set()
@@ -142,7 +145,8 @@ class ReportImporter:
             return
 
         player = self._get_or_create_player(row[2])
-        self._players_in_raid.add(player)
+        if self._track_players:
+            self._players_in_raid.add(player)
         consumable = self._all_consumables.get(int(row[9]))
 
         if consumable is None:
