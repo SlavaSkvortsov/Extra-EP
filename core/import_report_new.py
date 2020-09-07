@@ -1,4 +1,3 @@
-import csv
 from collections import defaultdict
 from datetime import datetime
 from functools import lru_cache
@@ -33,7 +32,8 @@ class ReportImporter:
         raid_run = None
         datetime_str = None
 
-        for row in csv.reader(self.log_file):
+        for row_raw in self.log_file.readlines():
+            row = row_raw.split(',')
             if raid_run is None:
                 raid_run = self._create_unknown_raid_run()
 
@@ -89,7 +89,7 @@ class ReportImporter:
                 self._finalize_consumable(row, parse_datetime_str(datetime_str))
 
             elif event == 'COMBATANT_INFO':
-                self._track_combatant_auras(row, raid_run, parse_datetime_str(datetime_str))
+                self._track_combatant_auras(row, row_raw, raid_run, parse_datetime_str(datetime_str))
 
         if raid_run:
             if raid_run.raid_id is not None:
@@ -173,13 +173,19 @@ class ReportImporter:
         )
         self._unfinished_consumables[player.id][consumable.id] = consumable_usage
 
-    def _track_combatant_auras(self, row: List[Any], raid_run: RaidRun, time: datetime) -> None:
-        auras = row[-1][1:-1]
+    def _track_combatant_auras(self, row: List[Any], row_raw: str, raid_run: RaidRun, time: datetime) -> None:
+        auras = row_raw[row_raw.rfind('[') + 1:]
+        auras = auras.strip()
+        auras = auras[:-1]
 
         for aura_id_str in auras.split(','):
+            aura_id_str = aura_id_str.strip()
             try:
                 aura_id = int(aura_id_str)
             except ValueError:
+                continue
+
+            if not aura_id:
                 continue
 
             consumable = self._all_consumables.get(aura_id)

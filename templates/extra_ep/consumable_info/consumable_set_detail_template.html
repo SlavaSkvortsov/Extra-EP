@@ -84,10 +84,10 @@
     {% for wb in world_buffs %}
         <div class="row">
             <div class="col-3">
-                <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
+                <a href="#" data-wowhead="spell={{ wb.spell_id }}&domain=ru.classic" >Spell</a>
             </div>
             <div class="col-3">
-                За приход в рейд <b>{{ consumable.points_for_usage }}</b> очков
+                За приход в рейд <b>{{ wb.points_for_usage }}</b> очков
             </div>
             <div class="col-3">
                 <span>Не обязательно</span>

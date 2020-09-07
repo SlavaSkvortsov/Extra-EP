@@ -207,5 +207,8 @@ class ConsumableSetDetailView(DetailView):
             is_world_buff=False,
         ).order_by('usage_based_item', '-required', 'name')
         result['groups'] = self.object.groups.order_by('-required').prefetch_related('consumables')
+        result['world_buffs'] = self.object.consumables.filter(
+            is_world_buff=True,
+        ).order_by('name')
 
         return result
