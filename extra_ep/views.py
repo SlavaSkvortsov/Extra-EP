@@ -83,7 +83,7 @@ class CombatListView(tables.SingleTableView):
 
 class ReportTable(tables.Table):
     raid_name = tables.LinkColumn(
-        viewname='extra_ep:combat_list',
+        viewname='extra_ep:report_new',
         text=lambda report: report.raid_name,
         kwargs={'report_id': A('pk')},
     )
