@@ -3,6 +3,7 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import reduce
+from itertools import chain
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from django.db.models import Count
@@ -154,7 +155,12 @@ class ExportReport:
     ) -> List[BaseConsumableUsageModel]:
         result: List[BaseConsumableUsageModel] = []
 
-        for consumable in required_set.consumables.all():
+        all_consumables = required_set.consumables.all()
+        if raid_run.is_hard_mode:
+            groups_consumables = chain.from_iterable(group.consumables.all() for group in required_set.groups.all())
+            all_consumables = set(all_consumables) | set(groups_consumables)
+
+        for consumable in all_consumables:
             if consumable.usage_based_item or raid_run.is_hard_mode:
                 amount = self._consumable_usage_amount.get(
                     raid_run.id, {},
@@ -203,24 +209,25 @@ class ExportReport:
                     coefficient=coeff,
                 ))
 
-        for group in required_set.groups.all():
-            uptime = group_uptime[group.id]
-            raid_uptime = self._get_raid_uptime(uptime, raid_run)
+        if not raid_run.is_hard_mode:
+            for group in required_set.groups.all():
+                uptime = group_uptime[group.id]
+                raid_uptime = self._get_raid_uptime(uptime, raid_run)
 
-            points, coeff = self._get_consumable_points(
-                raid_run=raid_run,
-                raid_uptime=raid_uptime,
-                points=group.points,
-                required=group.required,
-            )
+                points, coeff = self._get_consumable_points(
+                    raid_run=raid_run,
+                    raid_uptime=raid_uptime,
+                    points=group.points,
+                    required=group.required,
+                )
 
-            points = int(round(points * raid_run.points_coefficient))
-            result.append(UptimeConsumableUsageModel(
-                points=points,
-                group_id=group.id,
-                periods=raid_uptime,
-                coefficient=coeff,
-            ))
+                points = int(round(points * raid_run.points_coefficient))
+                result.append(UptimeConsumableUsageModel(
+                    points=points,
+                    group_id=group.id,
+                    periods=raid_uptime,
+                    coefficient=coeff,
+                ))
 
         return result
 
