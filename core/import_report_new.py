@@ -141,11 +141,11 @@ class ReportImporter:
         )
 
     def _make_consumable_usage(self, row: List[Any], raid_run: RaidRun, time: datetime) -> None:
-        player_name = row[2]
+        player_name = row[2].strip('"')
         if not player_name.endswith(self.SERVER_POSTFIX):
             return
 
-        player = self._get_or_create_player(row[2])
+        player = self._get_or_create_player(player_name)
         if self._track_players:
             self._players_in_raid.add(player)
         consumable = self._all_consumables.get(int(row[9]))
@@ -207,7 +207,7 @@ class ReportImporter:
         if consumable is None:
             return
 
-        player = self._get_or_create_player(row[2])
+        player = self._get_or_create_player(row[2].strip('"'))
         self._player_map[row[1]] = player
 
         unfinished_usage = self._unfinished_consumables[player.id].get(consumable.id)
