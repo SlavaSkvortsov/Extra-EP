@@ -17,6 +17,14 @@
     {% endblock %}
     {% render_breadcrumbs %}
     <h1>Химия</h1><br/>
+
+    <div class="row">
+        <div class="col-3"><h2>Расходник</h2></div>
+        <div class="col-3"><h2>Количество очков</h2></div>
+        <div class="col-3"><h2>Обязательно ли?</h2></div>
+        <div class="col-3"><h2>Лимиты</h2></div>
+    </div>
+
     {% for consumable in consumables %}
         <div class="row">
             <div class="col-3">
@@ -80,6 +88,13 @@
 
     {% if world_buffs %}
         <h1>Мировые бафы</h1><br/>
+
+        <div class="row">
+            <div class="col-3"><h2>Баф</h2></div>
+            <div class="col-3"><h2>Количество очков</h2></div>
+            <div class="col-3"><h2>Обязательно ли?</h2></div>
+            <div class="col-3"><h2>Лимиты</h2></div>
+        </div>
     {% endif %}
     {% for wb in world_buffs %}
         <div class="row">
