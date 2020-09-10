@@ -31,8 +31,9 @@ class ReportImporter:
     def process(self) -> None:
         raid_run = None
         datetime_str = None
-
-        for row_raw in self.log_file.readlines():
+        # yes, I know how hacky it is, but I don't want to change type :(
+        iterator = self.log_file.readlines() if hasattr(self.log_file, 'readlines') else self.log_file
+        for row_raw in iterator:
             row = row_raw.split(',')
             if raid_run is None:
                 raid_run = self._create_unknown_raid_run()
