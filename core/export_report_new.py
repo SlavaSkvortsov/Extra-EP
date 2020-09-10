@@ -42,12 +42,23 @@ class ExportReport:
 
     warnings: Set[str] = field(init=False, default_factory=set)
 
+    _consumable_counted: Dict[int, Dict[int, int]] = field(  # Dict[player_id, Dict[consumable_id, count]]
+        init=False,
+        default_factory=lambda: defaultdict(lambda: defaultdict(int)),
+    )
+
     def process(self) -> Dict[int, Dict[int, List[BaseConsumableUsageModel]]]:
         result: Dict[int, Dict[int, List[BaseConsumableUsageModel]]] = defaultdict(dict)
 
         players = set()
         players_by_raid_run = {}
-        raid_runs = list(RaidRun.objects.prefetch_related('players').filter(report_id=self.report_id))
+        raid_runs_qs = RaidRun.objects.prefetch_related(
+            'players',
+        ).filter(
+            report_id=self.report_id,
+        ).order_by('begin')
+        raid_runs = list(raid_runs_qs)
+
         for raid_run in raid_runs:
             raid_run_players = set(raid_run.players.all())
             players_by_raid_run[raid_run.id] = {player.id for player in raid_run_players}
@@ -157,6 +168,15 @@ class ExportReport:
 
                 if consumable.is_world_buff:
                     amount = min(amount, 1)
+
+                total_used_in_report = self._consumable_counted[player.id][consumable.id]
+                if (
+                    consumable.limit_over_report is not None
+                    and total_used_in_report + amount > consumable.limit_over_report
+                ):
+                    amount = consumable.limit_over_report - total_used_in_report
+
+                self._consumable_counted[player.id][consumable.id] += amount
 
                 points = consumable.points_for_usage * amount
                 result.append(ConsumableUsageModel(

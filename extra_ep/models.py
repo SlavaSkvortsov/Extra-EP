@@ -115,6 +115,12 @@ class Consumable(BaseModel):
     required = models.BooleanField(verbose_name='Требуется (влияет только на очки за время)', blank=True, default=True)
     is_world_buff = models.BooleanField(verbose_name='Мировой баф', blank=True, default=False)
 
+    limit_over_report = models.IntegerField(
+        verbose_name='Лимит в отчете (самое то для титанок)',
+        blank=True,
+        null=True,
+    )
+
     def __str__(self):
         return self.name or 'Укажи, бля, имя, а то хуйня какая-то'
 

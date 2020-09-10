@@ -6,8 +6,17 @@ from extra_ep.models import (
 )
 
 
+class RaidRunInline(admin.TabularInline):
+    model = RaidRun
+    autocomplete_fields = ('players',)
+    extra = 0
+
+
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
+    inlines = [
+        RaidRunInline,
+    ]
     list_filter = ('static', 'flushed')
     search_fields = ('raid_name',)
 
