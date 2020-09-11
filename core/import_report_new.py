@@ -83,7 +83,7 @@ class ReportImporter:
 
                     raid_run = None
 
-            elif event in ('SPELL_AURA_APPLIED', 'SPELL_CAST_START', 'SPELL_CAST_SUCCESS'):
+            elif event in ('SPELL_CAST_START', 'SPELL_CAST_SUCCESS'):
                 self._make_consumable_usage(row, raid_run, parse_datetime_str(datetime_str))
 
             elif event == 'SPELL_AURA_REMOVED':
