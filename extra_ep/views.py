@@ -170,7 +170,7 @@ class CreateReportView(CreateView):
     template_name = 'extra_ep/report/report_create_template.html'
 
     def get_success_url(self):
-        return reverse('extra_ep:combat_list', kwargs={'report_id': self.object.id})
+        return reverse('extra_ep:report_new', kwargs={'report_id': self.object.id})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

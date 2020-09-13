@@ -83,8 +83,13 @@ class ReportImporter:
 
                     raid_run = None
 
-            elif event in ('SPELL_CAST_START', 'SPELL_CAST_SUCCESS'):
-                self._make_consumable_usage(row, raid_run, parse_datetime_str(datetime_str))
+            elif event in ('SPELL_CAST_START', 'SPELL_CAST_SUCCESS', 'SPELL_AURA_APPLIED'):
+                self._make_consumable_usage(
+                    row=row,
+                    raid_run=raid_run,
+                    time=parse_datetime_str(datetime_str),
+                    is_aura=(event == 'SPELL_AURA_APPLIED'),
+                )
 
             elif event == 'SPELL_AURA_REMOVED':
                 self._finalize_consumable(row, parse_datetime_str(datetime_str))
@@ -140,7 +145,7 @@ class ReportImporter:
             report_id=self.report_id,
         )
 
-    def _make_consumable_usage(self, row: List[Any], raid_run: RaidRun, time: datetime) -> None:
+    def _make_consumable_usage(self, row: List[Any], raid_run: RaidRun, time: datetime, is_aura: bool) -> None:
         player_name = row[2].strip('"')
         if not player_name.endswith(self.SERVER_POSTFIX):
             return
@@ -153,6 +158,9 @@ class ReportImporter:
         if consumable is None:
             return
 
+        if is_aura and not consumable.check_by_aura_apply:
+            return
+
         self._player_map[row[1]] = player
 
         aprox_usage_time = time.replace(microsecond=0)
@@ -163,6 +171,10 @@ class ReportImporter:
 
         existing_unfinished_usage = self._unfinished_consumables[player.id].get(consumable.id)
         if existing_unfinished_usage is not None:
+            if is_aura and existing_unfinished_usage.begin + consumable.duration_timedelta > time:
+                # previous aura did not end
+                return
+
             existing_unfinished_usage.end = time
             existing_unfinished_usage.save()
 

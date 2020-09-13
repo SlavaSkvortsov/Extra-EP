@@ -112,14 +112,22 @@ class Consumable(BaseModel):
 
     points_for_usage = models.IntegerField(verbose_name='Очки за одно использование', blank=False, null=False)
     points_over_raid = models.IntegerField(verbose_name='Очки за рейд', blank=True, null=True)
+
+    duration = models.IntegerField(verbose_name='Продолжительность, в минутах', blank=True, null=True)
+
     required = models.BooleanField(verbose_name='Требуется (влияет только на очки за время)', blank=True, default=True)
     is_world_buff = models.BooleanField(verbose_name='Мировой баф', blank=True, default=False)
+    check_by_aura_apply = models.BooleanField(verbose_name='Проверять по ауре', default=False)
 
     limit_over_report = models.IntegerField(
         verbose_name='Лимит в отчете (самое то для титанок)',
         blank=True,
         null=True,
     )
+
+    @cached_property
+    def duration_timedelta(self):
+        return timedelta(minutes=self.duration)
 
     def __str__(self):
         return self.name or 'Укажи, бля, имя, а то хуйня какая-то'
@@ -128,6 +136,11 @@ class Consumable(BaseModel):
         if not self.usage_based_item and self.points_over_raid is None:
             raise ValidationError(
                 'Необходимо указать очки за рейд или поставить галочку "Давать очки за использование"',
+            )
+
+        if self.check_by_aura_apply and self.duration is None:
+            raise ValidationError(
+                'Необходимо указать продолжительность чтоб если хочешь трекать по ауре'
             )
 
         return super().clean()
