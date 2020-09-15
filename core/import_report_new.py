@@ -83,7 +83,7 @@ class ReportImporter:
 
                     raid_run = None
 
-            elif event in ('SPELL_CAST_START', 'SPELL_CAST_SUCCESS', 'SPELL_AURA_APPLIED'):
+            elif event in ('SPELL_CAST_SUCCESS', 'SPELL_AURA_APPLIED'):
                 self._make_consumable_usage(
                     row=row,
                     raid_run=raid_run,
