@@ -100,6 +100,7 @@ class ReportImporter:
         if raid_run:
             if raid_run.raid_id is not None:
                 raid_run.end = parse_datetime_str(datetime_str)
+                raid_run.players.add(*self._players_in_raid)
                 raid_run.save()
             else:
                 raid_run.delete()
