@@ -184,13 +184,6 @@ class CreateReportView(CreateView):
         encoding = chardet_result['encoding']
         form.files['log_file'].file.seek(0)
 
-        importer = ReportImporter(
-            report_id=self.object.id,
-            log_file=codecs.iterdecode(form.files['log_file'].file, encoding),
-        )
-        importer.process()
-
-        form.files['log_file'].file.seek(0)
         new_importer = ReportImporterNew(
             report_id=self.object.id,
             log_file=codecs.iterdecode(form.files['log_file'].file, encoding),
