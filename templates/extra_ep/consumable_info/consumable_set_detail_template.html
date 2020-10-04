@@ -47,6 +47,9 @@
                 {% else %}
                     <span>Не обязательно</span>
                 {% endif %}
+                {% if consumable.broken %}
+                    <span class="false">(не трекается)</span>
+                {% endif %}
             </div>
             <div class="col-3">
                 {% for limit in consumable.limits.all %}
