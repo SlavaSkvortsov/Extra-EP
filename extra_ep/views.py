@@ -162,7 +162,7 @@ class ChangeExportedView(UpdateView):
     pk_url_kwarg = 'report_id'
 
     def get_success_url(self):
-        return reverse('extra_ep:combat_list', kwargs={'report_id': self.object.id})
+        return reverse('extra_ep:report_new', kwargs={'report_id': self.object.id})
 
 
 class CreateReportView(CreateView):
