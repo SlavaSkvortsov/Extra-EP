@@ -21,7 +21,7 @@
                     {{ warning }}<br/>
                 {% endfor %}
             {% else %}
-                <a href="{% url 'extra_ep:report_export' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
+                <a href="{% url 'extra_ep:report_export_new' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
             {% endif %}
         {% endif %}
     </div>
