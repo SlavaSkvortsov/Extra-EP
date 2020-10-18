@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 
 from core.export_report_new import ConsumableUsageModel, ExportReport, UptimeConsumableUsageModel
+from extra_ep.forms import ChangeExportedForm
 from extra_ep.models import Class, Consumable, ConsumableGroup, ConsumablesSet, Player, RaidRun, Report, Role
 
 
@@ -65,8 +66,10 @@ class ReportDetailView(tables.SingleTableView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['report'] = get_object_or_404(Report, id=self.kwargs['report_id'])
+        report = get_object_or_404(Report, id=self.kwargs['report_id'])
+        context['report'] = report
         context['warnings'] = self.warnings
+        context['change_exported_from'] = ChangeExportedForm(instance=report)
 
         return context
 
