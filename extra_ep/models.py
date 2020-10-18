@@ -125,6 +125,8 @@ class Consumable(BaseModel):
         null=True,
     )
 
+    broken = models.BooleanField(verbose_name='Не отображается в логах', default=False)
+
     @cached_property
     def duration_timedelta(self):
         return timedelta(minutes=self.duration)
