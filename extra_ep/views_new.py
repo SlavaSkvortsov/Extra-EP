@@ -23,9 +23,9 @@ class ReportDetailTable(tables.Table):
         verbose_name='Предмет',
         template_code='''
 {% if record.item_id %}
-    <a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.classic" >Item</a>
+    <a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.tbc" >Item</a>
 {% elif record.spell_id %}
-    <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.classic" >Spell</a>
+    <a href="#" data-wowhead="spell={{ record.spell_id }}&domain=ru.tbc" >Spell</a>
 {% elif record.group_name %}
     {% if not record.group_consumables %}
         {{ record.group_name }}
