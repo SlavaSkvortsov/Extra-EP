@@ -19,7 +19,7 @@ from extra_ep.models import Combat, ItemConsumption, Report
 class ItemConsumptionTable(tables.Table):
     item_link = tables.TemplateColumn(
         verbose_name='Предмет',
-        template_code='<a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.classic" >Item</a>',
+        template_code='<a href="#" data-wowhead="item={{ record.item_id }}&domain=ru.tbc" >Item</a>',
         accessor='item_id',
     )
 
