@@ -34,9 +34,9 @@ class ReportDetailTable(tables.Table):
             {% for consumable in record.group_consumables %}
                 <div>
                     {% if consumable.item_id %}
-                        <a href="#" data-wowhead="item={{ consumable.item_id }}&domain=ru.classic" >Item</a>
+                        <a href="#" data-wowhead="item={{ consumable.item_id }}&domain=ru.tbc" >Item</a>
                     {% else %}
-                        <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.classic" >Spell</a>
+                        <a href="#" data-wowhead="spell={{ consumable.spell_id }}&domain=ru.tbc" >Spell</a>
                     {% endif %}
                 </div>
             {% endfor %}
