@@ -1,9 +1,11 @@
 from typing import Any, Dict
 
 import django_tables2 as tables
+from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 
+from core.discord import DiscordNotification
 from core.export_report_new import ConsumableUsageModel, ExportReport, UptimeConsumableUsageModel
 from extra_ep.forms import ChangeExportedForm
 from extra_ep.models import Class, Consumable, ConsumableGroup, ConsumablesSet, Player, RaidRun, Report, Role
@@ -153,6 +155,17 @@ class ExportReportView(DetailView):
             rows.append(f'{player.name},{points}')
 
         return '\n'.join(sorted(rows))
+
+
+class DiscordHookView(DetailView):
+    model = Report
+    pk_url_kwarg = 'report_id'
+
+    def post(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        report = self.get_object()
+        DiscordNotification(report=report).notify()
+        messages.success(request, 'Данные успешно отправлены в дискорд')
+        return redirect('extra_ep:report_new', report_id=report.id)
 
 
 class ClassListView(ListView):

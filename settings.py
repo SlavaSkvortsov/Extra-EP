@@ -151,6 +151,8 @@ LOCALE_PATHS = (
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
+DISCORD_WEBHOOK_URL = ''
+
 try:
     from local_settings import *
 except ImportError:

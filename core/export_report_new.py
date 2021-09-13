@@ -37,6 +37,9 @@ class UptimeConsumableUsageModel(BaseConsumableUsageModel):
     periods: List[Period] = field(default_factory=list)
 
 
+ReportType = Dict[int, Dict[int, List[BaseConsumableUsageModel]]]
+
+
 @dataclass
 class ExportReport:
     report_id: int
@@ -48,8 +51,8 @@ class ExportReport:
         default_factory=lambda: defaultdict(lambda: defaultdict(int)),
     )
 
-    def process(self) -> Dict[int, Dict[int, List[BaseConsumableUsageModel]]]:
-        result: Dict[int, Dict[int, List[BaseConsumableUsageModel]]] = defaultdict(dict)
+    def process(self) -> ReportType:
+        result: ReportType = defaultdict(dict)
 
         players = set()
         players_by_raid_run = {}

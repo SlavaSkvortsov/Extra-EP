@@ -13,18 +13,27 @@
 {% endblock %}
 
 {% block before_table %}
-    <div>
-        {% if request.user.is_staff %}
-            {% if warnings %}
-                <h2>Ошибки при построении отчета:</h2>
-                {% for warning in warnings %}
-                    {{ warning }}<br/>
-                {% endfor %}
-            {% else %}
-                <a href="{% url 'extra_ep:report_export_new' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
-            {% endif %}
-        {% endif %}
-    </div>
+    {% if request.user.is_staff %}
+        <div class="row">
+            <div class="col-9">
+                {% if warnings %}
+                    <h2>Ошибки при построении отчета:</h2>
+                    {% for warning in warnings %}
+                        {{ warning }}<br/>
+                    {% endfor %}
+                {% else %}
+                    <a href="{% url 'extra_ep:report_export_new' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
+                {% endif %}
+            </div>
+
+            <div class="col-3">
+                <form method="post" style="float: right;" action="{% url 'extra_ep:send_to_discord' report_id=report.id %}">
+                    {% csrf_token %}
+                    <input type="submit" value="Отправить в Discord" class="btn btn-primary">
+                </form>
+            </div>
+        </div>
+    {% endif %}
     {% if report.flushed %}
         <h1 class="text-success">Отчет уже выгружен!</h1>
     {% else %}

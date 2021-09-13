@@ -13,6 +13,7 @@ urlpatterns = [
 
     path(r'report_new/<int:report_id>/', views_new.ReportDetailView.as_view(), name='report_new'),
     path(r'report_new/<int:report_id>/export', views_new.ExportReportView.as_view(), name='report_export_new'),
+    path(r'report_new/<int:report_id>/send_to_discord', views_new.DiscordHookView.as_view(), name='send_to_discord'),
 
     path(r'report/create/', views.CreateReportView.as_view(), name='report_create'),
     path(r'reports/', views.ReportListView.as_view(), name='report_list'),
