@@ -2,9 +2,12 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List
+from urllib.parse import urljoin
 
 from discord_webhook import DiscordEmbed, DiscordWebhook
 from django.conf import settings
+from django.urls import reverse
+from django.templatetags.static import static
 
 from core.export_report_new import BaseConsumableUsageModel, ExportReport, ReportType
 from extra_ep.models import Player, RaidRun, Report
@@ -30,6 +33,13 @@ class DiscordNotification:
                 f'Начало - {self._extract_time(min(raid_run.begin for raid_run in raid_runs if raid_run.begin))}, '
                 f'окончание - {self._extract_time(max(raid_run.end for raid_run in raid_runs if raid_run.end))}'
             ),
+            color=0xb51cd4,
+        )
+
+        embed.set_author(
+            name='EP с сайта',
+            url=urljoin(settings.BASE_URL, reverse('extra_ep:report_new', kwargs={'report_id': self.report.id})),
+            icon_url=urljoin(settings.BASE_URL, static('discord_icon.png')),
         )
 
         for raid_run in raid_runs:
@@ -89,4 +99,4 @@ class DiscordNotification:
         return result
 
     def _extract_time(self, dtime: datetime) -> str:
-        return dtime.strftime('%Y-%m-%d %H:%M')
+        return dtime.strftime('%H:%M')

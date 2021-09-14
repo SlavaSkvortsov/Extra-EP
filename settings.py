@@ -153,6 +153,8 @@ LOGIN_REDIRECT_URL = '/'
 
 DISCORD_WEBHOOK_URL = ''
 
+BASE_URL = 'http://127.0.0.1/'
+
 try:
     from local_settings import *
 except ImportError:
