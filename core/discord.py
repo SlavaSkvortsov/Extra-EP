@@ -39,7 +39,7 @@ class DiscordNotification:
         embed.set_author(
             name='EP с сайта',
             url=urljoin(settings.BASE_URL, reverse('extra_ep:report_new', kwargs={'report_id': self.report.id})),
-            icon_url=urljoin(settings.BASE_URL, static('discord_icon.png')),
+            icon_url=urljoin(settings.BASE_URL, static('extra_ep/discord_icon.png')),
         )
 
         for raid_run in raid_runs:
