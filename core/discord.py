@@ -42,13 +42,18 @@ class DiscordNotification:
             icon_url=urljoin(settings.BASE_URL, static('extra_ep/discord_icon.png')),
         )
 
-        for raid_run in raid_runs:
+        if raid_runs == 1:
+            raid_run = raid_runs[0]
             embed.add_embed_field(
                 name=f'⚔{raid_run.raid.name}',
-                value=self._get_consumable_text(report_data[raid_run.id], players),
+                value=self._get_consumable_text(report_data[raid_run.id], players, separator=', '),
             )
-
-        if len(raid_runs) > 1:
+        else:
+            for raid_run in raid_runs:
+                embed.add_embed_field(
+                    name=f'⚔{raid_run.raid.name}',
+                    value=self._get_consumable_text(report_data[raid_run.id], players),
+                )
             self._add_total(report_data, players, embed)
 
         webhook = DiscordWebhook(url=settings.DISCORD_WEBHOOK_URL)
@@ -70,6 +75,7 @@ class DiscordNotification:
         self,
         data: Dict[int, List[BaseConsumableUsageModel]],
         players: List[Player],
+        separator: str = '\n',
     ) -> str:
         player_summary = {
             player_id: sum(consumable.points for consumable in consumables) for player_id, consumables in data.items()
@@ -80,7 +86,7 @@ class DiscordNotification:
             if summary:
                 result.append(f'{player.name} - {bold(summary)}')
 
-        return ', '.join(result)
+        return separator.join(result)
 
     def _get_players(self, player_ids: List[int]) -> List[Player]:
         queryset = Player.objects.filter(id__in=player_ids).select_related('klass').order_by('name')
