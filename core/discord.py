@@ -42,7 +42,7 @@ class DiscordNotification:
             icon_url=urljoin(settings.BASE_URL, static('extra_ep/discord_icon.png')),
         )
 
-        if raid_runs == 1:
+        if len(raid_runs) == 1:
             raid_run = raid_runs[0]
             embed.add_embed_field(
                 name=f'⚔{raid_run.raid.name}',
