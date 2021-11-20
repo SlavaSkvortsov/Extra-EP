@@ -137,7 +137,7 @@ class ReportImporter:
         raid_runs = list(qs)
         report = Report.objects.get(id=self.report_id)
         report.raid_day = next((raid_run.begin for raid_run in raid_runs if raid_run.begin), None)
-        report.raid_name = ', '.join(str(raid_run.raid) for raid_run in raid_runs if raid_run.raid_id)
+        report.raid_name = ', '.join(sorted({str(raid_run.raid) for raid_run in raid_runs if raid_run.raid_id}))
 
         report.save()
 
