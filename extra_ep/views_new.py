@@ -1,14 +1,78 @@
+import codecs
 from typing import Any, Dict
 
+import chardet
 import django_tables2 as tables
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import DetailView, ListView
+from django.urls import reverse
+from django.views.generic import CreateView, DetailView, ListView, RedirectView, UpdateView
+from django_tables2 import A
 
 from core.discord import DiscordNotification
 from core.export_report_new import ConsumableUsageModel, ExportReport, UptimeConsumableUsageModel
-from extra_ep.forms import ChangeExportedForm
+from extra_ep.forms import ChangeExportedForm, UploadFile
 from extra_ep.models import Class, Consumable, ConsumableGroup, ConsumablesSet, Player, RaidRun, Report, Role
+from core.import_report_new import ReportImporter
+
+
+class MainRedirectView(RedirectView):
+    pattern_name = 'extra_ep:report_list'
+
+
+class ReportTable(tables.Table):
+    raid_name = tables.LinkColumn(
+        viewname='extra_ep:report_new',
+        text=lambda report: report.raid_name,
+        kwargs={'report_id': A('pk')},
+    )
+
+    class Meta:
+        model = Report
+        fields = ('raid_name', 'static', 'raid_day', 'flushed', 'uploaded_by', 'created_at')
+
+
+class ReportListView(tables.SingleTableView):
+    model = Report
+    table_class = ReportTable
+    template_name = 'extra_ep/report/report_list_template.html'
+
+
+class CreateReportView(CreateView):
+    form_class = UploadFile
+    template_name = 'extra_ep/report/report_create_template.html'
+
+    def get_success_url(self):
+        return reverse('extra_ep:report_new', kwargs={'report_id': self.object.id})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+
+        chardet_result = chardet.detect(form.files['log_file'].file.read(1000))
+        encoding = chardet_result['encoding']
+        form.files['log_file'].file.seek(0)
+
+        importer = ReportImporter(
+            report_id=self.object.id,
+            log_file=codecs.iterdecode(form.files['log_file'].file, encoding),
+        )
+        importer.process()
+
+        return result
+
+
+class ChangeExportedView(UpdateView):
+    model = Report
+    form_class = ChangeExportedForm
+    pk_url_kwarg = 'report_id'
+
+    def get_success_url(self):
+        return reverse('extra_ep:report_new', kwargs={'report_id': self.object.id})
 
 
 class ReportDetailTable(tables.Table):

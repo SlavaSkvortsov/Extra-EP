@@ -156,15 +156,6 @@ class ExportReportView(DetailView):
         return context
 
 
-class ChangeExportedView(UpdateView):
-    model = Report
-    form_class = ChangeExportedForm
-    pk_url_kwarg = 'report_id'
-
-    def get_success_url(self):
-        return reverse('extra_ep:report_new', kwargs={'report_id': self.object.id})
-
-
 class CreateReportView(CreateView):
     form_class = UploadFile
     template_name = 'extra_ep/report/report_create_template.html'

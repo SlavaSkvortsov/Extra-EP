@@ -230,7 +230,7 @@ class Report(BaseModel):
     static = models.IntegerField(
         verbose_name='Статик',
         default=2,
-        choices=((2, 'Второй'), (3, 'Третий'), (1, 'Первый :(')),
+        choices=((2, 'Второй'), (3, 'Третий'), (4, 'Четвертый'), (1, 'Первый :(')),
         null=False,
     )
     raid_day = models.DateField(verbose_name='День рейда', null=True)
@@ -244,24 +244,3 @@ class Report(BaseModel):
 
     def __str__(self) -> str:
         return f'{self.raid_name} ({self.raid_day})'
-
-
-class Combat(BaseModel):
-    report = models.ForeignKey('extra_ep.Report', verbose_name='Отчет', on_delete=models.CASCADE)
-    started = models.DateTimeField(verbose_name='Начало', null=False)
-    ended = models.DateTimeField(verbose_name='Окончание', null=False)
-
-    encounter = models.CharField(verbose_name='Бой', null=False, max_length=200)
-
-    def __str__(self) -> str:
-        return self.encounter
-
-
-class ItemConsumption(BaseModel):
-    combat = models.ForeignKey('extra_ep.Combat', verbose_name='Бой', on_delete=models.CASCADE)
-    player = models.ForeignKey('extra_ep.Player', verbose_name='Игрок', on_delete=models.CASCADE)
-    spell_id = models.IntegerField(null=False)
-    item_id = models.IntegerField(null=False)
-    used_at = models.DateTimeField(null=False, verbose_name='Применено')
-
-    ep = models.IntegerField(null=False, verbose_name='EP')

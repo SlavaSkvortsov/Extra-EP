@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 from extra_ep.models import (
-    Boss, Class, Combat, Consumable, ConsumableGroup, ConsumableUsage, ConsumableUsageLimit, ConsumablesSet,
-    ItemConsumption, Player, Raid, RaidRun, Report, Role
+    Boss, Class,  Consumable, ConsumableGroup, ConsumableUsage, ConsumableUsageLimit, ConsumablesSet,
+    Player, Raid, RaidRun, Report, Role
 )
 
 
@@ -19,16 +19,6 @@ class ReportAdmin(admin.ModelAdmin):
     ]
     list_filter = ('static', 'flushed')
     search_fields = ('raid_name',)
-
-
-@admin.register(Combat)
-class CombatAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(ItemConsumption)
-class ItemConsumptionAdmin(admin.ModelAdmin):
-    pass
 
 
 @admin.register(Boss)
@@ -93,7 +83,7 @@ class ConsumableGroupAdmin(admin.ModelAdmin):
 
 @admin.register(RaidRun)
 class RaidRunAdmin(admin.ModelAdmin):
-    autocomplete_fields = ('players', )
+    autocomplete_fields = ('players',)
 
 
 @admin.register(ConsumableUsage)
