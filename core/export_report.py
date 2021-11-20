@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import reduce
 from itertools import chain
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, Iterable, List, NamedTuple, Optional, Set, Tuple
 
 from django.db.models import Count
 from django.urls import reverse
@@ -41,11 +41,16 @@ class UptimeConsumableUsageModel(BaseConsumableUsageModel):
 ReportType = Dict[int, Dict[int, List[BaseConsumableUsageModel]]]
 
 
+class Warning(NamedTuple):
+    text: str
+    player_id: Optional[int] = None
+
+
 @dataclass
 class ExportReport:
     report_id: int
 
-    warnings: Set[str] = field(init=False, default_factory=set)
+    warnings: Set[Warning] = field(init=False, default_factory=set)
 
     _consumable_counted: Dict[int, Dict[int, int]] = field(  # Dict[player_id, Dict[consumable_id, count]]
         init=False,
@@ -72,21 +77,21 @@ class ExportReport:
         for player in players:
             delete_url = reverse('admin:extra_ep_player_delete', args=[player.id])
             edit_url = reverse('admin:extra_ep_player_change', args=[player.id])
-            buttons = f' <a href="{delete_url}">Удалить</a> / <a href="{edit_url}">Редактировать</a>'
+            buttons = f' '
 
             if player.role_id is None:
-                self.warnings.add(f'У игрока {player} не указана роль! {buttons}')
+                self.warnings.add(Warning(text=f'У игрока {player} не указана роль!', player_id=player.id))
                 continue
 
             if player.klass_id is None:
-                self.warnings.add(f'У игрока {player} не указан класс! {buttons}')
+                self.warnings.add(Warning(text=f'У игрока {player} не указан класс!', player_id=player.id))
                 continue
 
             required_set = self._consumable_sets.get(player.klass_id, {}).get(player.role_id)
             if required_set is None:
-                self.warnings.add(
-                    f'Для класса {player.klass} и роли {player.role} не найден набор необходимых расходников',
-                )
+                self.warnings.add(Warning(
+                    text=f'Для класса {player.klass} и роли {player.role} не найден набор необходимых расходников',
+                ))
                 continue
 
             consumable_uptime = self._get_player_consumable_uptime(player, required_set)

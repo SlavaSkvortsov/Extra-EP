@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 
 from extra_ep.models import (
     Boss, Class,  Consumable, ConsumableGroup, ConsumableUsage, ConsumableUsageLimit, ConsumablesSet,
@@ -36,6 +37,13 @@ class RaidAdmin(admin.ModelAdmin):
 class PlayerAdmin(admin.ModelAdmin):
     list_filter = ('klass', 'role')
     search_fields = ('name', 'klass__name', 'role__name')
+
+    def response_delete(self, request, obj_display, obj_id):
+        next_url = request.POST.get('next', None)
+        if next_url:
+            return HttpResponseRedirect(next_url)
+
+        return super().response_delete(request, obj_display, obj_id)
 
 
 @admin.register(Role)

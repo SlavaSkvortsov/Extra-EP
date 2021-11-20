@@ -19,7 +19,26 @@
                 {% if warnings %}
                     <h2>Ошибки при построении отчета:</h2>
                     {% for warning in warnings %}
-                        {{ warning |safe }}<br/>
+
+                        <div class="row">
+                            <div class="col-4 mini-box">
+                                {{ warning.text }}
+                            </div>
+                            {% if warning.player_id %}
+                                <div class="col-1 mini-box">
+                                    <form method="post" action="{% url 'admin:extra_ep_player_delete' warning.player_id %}">
+                                        {% csrf_token %}
+                                        <input type="submit" class="btn btn-danger btn-sm" value="Удалить">
+                                        <input type="hidden" name="next" value="{% url 'extra_ep:report' report_id=report.id %}" />
+                                    </form>
+                                </div>
+                                <div class="col-1 mini-box">
+                                    <a href="{% url 'admin:extra_ep_player_change' warning.player_id %}" class="btn btn-primary btn-sm">
+                                        Редактировать
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
                     {% endfor %}
                 {% else %}
                     <a href="{% url 'extra_ep:report_export' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
