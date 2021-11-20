@@ -71,13 +71,15 @@ class ExportReport:
 
         for player in players:
             delete_url = reverse('admin:extra_ep_player_delete', args=[player.id])
+            edit_url = reverse('admin:extra_ep_player_change', args=[player.id])
+            buttons = f' <a href="{delete_url}">Удалить</a> / <a href="{edit_url}">Редактировать</a>'
 
             if player.role_id is None:
-                self.warnings.add(f'У игрока {player} не указана роль! <a href="{delete_url}">Удалить</a>')
+                self.warnings.add(f'У игрока {player} не указана роль! {buttons}')
                 continue
 
             if player.klass_id is None:
-                self.warnings.add(f'У игрока {player} не указан класс! <a href="{delete_url}">Удалить</a>')
+                self.warnings.add(f'У игрока {player} не указан класс! {buttons}')
                 continue
 
             required_set = self._consumable_sets.get(player.klass_id, {}).get(player.role_id)
