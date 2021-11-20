@@ -19,10 +19,10 @@
                 {% if warnings %}
                     <h2>Ошибки при построении отчета:</h2>
                     {% for warning in warnings %}
-                        {{ warning }}<br/>
+                        {{ warning |safe }}<br/>
                     {% endfor %}
                 {% else %}
-                    <a href="{% url 'extra_ep:report_export_new' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
+                    <a href="{% url 'extra_ep:report_export' report_id=report.id %}" class="btn btn-primary">Экспорт</a><br/>
                 {% endif %}
             </div>
 

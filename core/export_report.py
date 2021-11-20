@@ -7,6 +7,7 @@ from itertools import chain
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from django.db.models import Count
+from django.urls import reverse
 from django.utils.functional import cached_property
 
 from extra_ep.models import Consumable, ConsumableUsage, ConsumableUsageLimit, ConsumablesSet, Player, RaidRun
@@ -69,12 +70,14 @@ class ExportReport:
             players.update(raid_run_players)
 
         for player in players:
+            delete_url = reverse('admin:extra_ep_player_delete', args=[player.id])
+
             if player.role_id is None:
-                self.warnings.add(f'У игрока {player} не указана роль!')
+                self.warnings.add(f'У игрока {player} не указана роль! <a href="{delete_url}">Удалить</a>')
                 continue
 
             if player.klass_id is None:
-                self.warnings.add(f'У игрока {player} не указан класс!')
+                self.warnings.add(f'У игрока {player} не указан класс! <a href="{delete_url}">Удалить</a>')
                 continue
 
             required_set = self._consumable_sets.get(player.klass_id, {}).get(player.role_id)

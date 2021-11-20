@@ -22,7 +22,7 @@ class MainRedirectView(RedirectView):
 
 class ReportTable(tables.Table):
     raid_name = tables.LinkColumn(
-        viewname='extra_ep:report_new',
+        viewname='extra_ep:report',
         text=lambda report: report.raid_name,
         kwargs={'report_id': A('pk')},
     )
@@ -43,7 +43,7 @@ class CreateReportView(CreateView):
     template_name = 'extra_ep/report/report_create_template.html'
 
     def get_success_url(self):
-        return reverse('extra_ep:report_new', kwargs={'report_id': self.object.id})
+        return reverse('extra_ep:report', kwargs={'report_id': self.object.id})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -72,7 +72,7 @@ class ChangeExportedView(UpdateView):
     pk_url_kwarg = 'report_id'
 
     def get_success_url(self):
-        return reverse('extra_ep:report_new', kwargs={'report_id': self.object.id})
+        return reverse('extra_ep:report', kwargs={'report_id': self.object.id})
 
 
 class ReportDetailTable(tables.Table):
@@ -124,7 +124,7 @@ class ReportDetailView(tables.SingleTableView):
     model = Report
     table_class = ReportDetailTable
     pk_url_kwarg = 'report_id'
-    template_name = 'extra_ep/report/new_report_detail.html'
+    template_name = 'extra_ep/report/report_detail.html'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -195,7 +195,7 @@ class ReportDetailView(tables.SingleTableView):
 
 class ExportReportView(DetailView):
     model = Report
-    template_name = 'extra_ep/report/new_report_export_template.html'
+    template_name = 'extra_ep/report/report_export_template.html'
     pk_url_kwarg = 'report_id'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
@@ -229,7 +229,7 @@ class DiscordHookView(DetailView):
         report = self.get_object()
         DiscordNotification(report=report).notify()
         messages.success(request, 'Данные успешно отправлены в дискорд')
-        return redirect('extra_ep:report_new', report_id=report.id)
+        return redirect('extra_ep:report', report_id=report.id)
 
 
 class ClassListView(ListView):

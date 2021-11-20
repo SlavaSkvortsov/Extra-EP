@@ -6,9 +6,9 @@ app_name = 'extra_ep'
 
 urlpatterns = [
 
-    path(r'report_new/<int:report_id>/', views.ReportDetailView.as_view(), name='report_new'),
-    path(r'report_new/<int:report_id>/export', views.ExportReportView.as_view(), name='report_export_new'),
-    path(r'report_new/<int:report_id>/send_to_discord', views.DiscordHookView.as_view(), name='send_to_discord'),
+    path(r'report/<int:report_id>/', views.ReportDetailView.as_view(), name='report'),
+    path(r'report/<int:report_id>/export', views.ExportReportView.as_view(), name='report_export'),
+    path(r'report/<int:report_id>/send_to_discord', views.DiscordHookView.as_view(), name='send_to_discord'),
     path(r'report/<int:report_id>/change_exported', views.ChangeExportedView.as_view(), name='change_exported'),
 
     path(r'report/create/', views.CreateReportView.as_view(), name='report_create'),
