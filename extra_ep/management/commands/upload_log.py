@@ -5,7 +5,7 @@ from typing import Any
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 
-from core.import_report_new import ReportImporter
+from core.import_report import ReportImporter
 from extra_ep.models import Report
 
 

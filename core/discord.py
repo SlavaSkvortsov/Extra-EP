@@ -9,7 +9,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.templatetags.static import static
 
-from core.export_report_new import BaseConsumableUsageModel, ExportReport, ReportType
+from core.export_report import BaseConsumableUsageModel, ExportReport, ReportType
 from extra_ep.models import Player, RaidRun, Report
 
 
