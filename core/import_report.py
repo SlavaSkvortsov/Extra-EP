@@ -10,7 +10,7 @@ from extra_ep.models import Boss, Consumable, ConsumableUsage, Player, RaidRun, 
 
 
 class ReportImporter:
-    SERVER_POSTFIX = '-РокДелар'
+    SERVER_POSTFIX = '-Пламегор'
 
     def __init__(self, report_id: int, log_file: TextIO) -> None:
         self.report_id = report_id
