@@ -1,4 +1,4 @@
-Django==3.2.9
+Django==3.2.14
 django-bootstrap-breadcrumbs==0.9.2
 django-bootstrap4==21.1
 django-registration==3.2
